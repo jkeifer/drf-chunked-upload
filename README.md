@@ -79,16 +79,15 @@ Typical usage
    file.
 
 
-Possible error responses:
-~~~~~~~~~~~~~~~~~~~~~~~~~
+**Possible error responses:**
 
-* Upload has expired. Server responds 410 (Gone).
-* `id` does not match any upload. Server responds 404 (Not found).
-* No chunk file is found in the indicated key. Server responds 400 (Bad request).
-* Request does not contain `Content-Range` header. Server responds 400 (Bad request).
-* Size of file exceeds limit (if specified).  Server responds 400 (Bad request).
-* Offsets does not match.  Server responds 400 (Bad request).
-* `md5` checksums does not match. Server responds 400 (Bad request).
+- Upload has expired. Server responds 410 (Gone).
+- `id` does not match any upload. Server responds 404 (Not found).
+- No chunk file is found in the indicated key. Server responds 400 (Bad request).
+- Request does not contain `Content-Range` header. Server responds 400 (Bad request).
+- Size of file exceeds limit (if specified).  Server responds 400 (Bad request).
+- Offsets does not match.  Server responds 400 (Bad request).
+- `md5` checksums does not match. Server responds 400 (Bad request).
 
 
 Settings
@@ -96,43 +95,37 @@ Settings
 
 Add any of these variables into your project settings to override them.
 
-`DRF_CHUNKED_UPLOAD_EXPIRATION_DELTA`
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**`DRF_CHUNKED_UPLOAD_EXPIRATION_DELTA`**
 
-* How long after creation the upload will expire.
-* Default: `datetime.timedelta(days=1)`
+- How long after creation the upload will expire.
+- Default: `datetime.timedelta(days=1)`
 
-`DRF_CHUNKED_UPLOAD_PATH`
-~~~~~~~~~~~~~~~~~~~~~~~~~
+**`DRF_CHUNKED_UPLOAD_PATH`**
 
-* Path where uploading files will be stored until completion.
-* Default: `'chunked_uploads/%Y/%m/%d'`
+- Path where uploading files will be stored until completion.
+- Default: `'chunked_uploads/%Y/%m/%d'`
 
-`DRF_CHUNKED_UPLOAD_STORAGE_CLASS`
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**`DRF_CHUNKED_UPLOAD_STORAGE_CLASS`**
 
-* Storage system (should be a class)
-* Default: `None` (use default storage system)
+- Storage system (should be a class)
+- Default: `None` (use default storage system)
 
-`DRF_CHUNKED_UPLOAD_USER_RESTRICED`
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**`DRF_CHUNKED_UPLOAD_USER_RESTRICED`**
 
-* Boolean that determines whether only the user who created
+- Boolean that determines whether only the user who created
   an upload can view/continue an upload
-* Default: `True`
+- Default: `True`
 
-`DRF_CHUNKED_UPLOAD_ABSTRACT_MODEL`
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**`DRF_CHUNKED_UPLOAD_ABSTRACT_MODEL`**
 
-* Boolean that defines if the `ChunkedUpload` model will be abstract or not
+- Boolean that defines if the `ChunkedUpload` model will be abstract or not
   ([what does abstract model mean?](https://docs.djangoproject.com/en/1.4/ref/models/options/#abstract))
-* Default: `True`
+- Default: `True`
 
-`DRF_CHUNKED_UPLOAD_MAX_BYTES`
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**`DRF_CHUNKED_UPLOAD_MAX_BYTES`**
 
-* Max amount of data (in bytes) that can be uploaded. `None` means no limit
-* Default: `None`
+- Max amount of data (in bytes) that can be uploaded. `None` means no limit
+- Default: `None`
 
 
 Support
