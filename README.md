@@ -9,7 +9,7 @@ This app is based to a large degree on the work of
 [Julio Malegria](https://github.com/juliomalegria),
 specifically his [django-chunked-upload app](https://github.com/juliomalegria/django-chunked-upload). 
 
-License: `MIT-Zero <https://romanrm.net/mit-zero>`__.
+License: [MIT-Zero](https://romanrm.net/mit-zero).
 
 
 Installation
