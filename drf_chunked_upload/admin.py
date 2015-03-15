@@ -6,8 +6,8 @@ from .settings import ABSTRACT_MODEL
 if not ABSTRACT_MODEL:  # If the model exists
 
     class ChunkedUploadAdmin(admin.ModelAdmin):
-        list_display = ('upload_id', 'filename', 'user', 'status',
-                        'created_on')
+        list_display = ('id', 'filename', 'user', 'status',
+                        'created_at')
         search_fields = ('filename',)
         list_filter = ('status',)
 

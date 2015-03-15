@@ -14,43 +14,59 @@ from .constants import CHUNKED_UPLOAD_CHOICES, UPLOADING
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
 
-def generate_upload_id():
+def generate_id():
     return uuid.uuid4().hex
 
 
 def generate_filename(instance, filename):
-    filename = os.path.join(UPLOAD_PATH, instance.upload_id + '.part')
+    filename = os.path.join(UPLOAD_PATH, instance.id + '.part')
     return time.strftime(filename)
 
 
 class ChunkedUpload(models.Model):
-    upload_id = models.CharField(max_length=32, unique=True, editable=False,
-                                 default=generate_upload_id)
-    file = models.FileField(max_length=255, upload_to=generate_filename,
+    id = models.CharField(max_length=32,
+                          unique=True,
+                          editable=False,
+                          default=generate_id,
+                          primary_key=True)
+    file = models.FileField(max_length=255,
+                            upload_to=generate_filename,
                             storage=STORAGE)
     filename = models.CharField(max_length=255)
-    user = models.ForeignKey(AUTH_USER_MODEL, related_name='chunked_uploads')
+    user = models.ForeignKey(AUTH_USER_MODEL,
+                             related_name='chunked_uploads',
+                             editable=False)
     offset = models.PositiveIntegerField(default=0)
-    created_on = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True,
+                                      editable=False)
     status = models.PositiveSmallIntegerField(choices=CHUNKED_UPLOAD_CHOICES,
                                               default=UPLOADING)
-    completed_on = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True,
+                                        blank=True)
 
     @property
-    def expires_on(self):
-        return self.created_on + EXPIRATION_DELTA
+    def expires_at(self):
+        return self.created_at + EXPIRATION_DELTA
 
     @property
     def expired(self):
-        return self.expires_on <= timezone.now()
+        return self.expires_at <= timezone.now()
 
     @property
-    def md5(self):
-        if getattr(self, '_md5', None) is None:
+    def md5(self, rehash=False):
+        if getattr(self, '_md5', None) is None or rehash is True:
             md5 = hashlib.md5()
-            for chunk in self.file.chunks():
-                md5.update(chunk)
-            self._md5 = md5.hexdigest()
+            print 66
+            try:
+                self.close_file()
+                self.file.open(mode='rb')
+                for chunk in self.file.chunks():
+                    md5.update(chunk)
+                    self._md5 = md5.hexdigest()
+                self.close_file()
+            except Exception as e:
+                print e
+            print self._md5
         return self._md5
 
     def delete(self, delete_file=True, *args, **kwargs):
