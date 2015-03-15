@@ -35,7 +35,9 @@ Typical usage
    overriden in the view (class attribute `field_name`).
    Example:
 
-    {"my_file": <File>}
+```python
+{"my_file": file}
+```
 
 2. In return, the server will respond with the
    `url` of the upload,
@@ -43,20 +45,24 @@ Typical usage
    and when the upload will
    expire (`expires`). Example:
 
-    {
-        "url": "https://your-host/uploads/5230ec1f59d1485d9d7974b853802e31",
-        "offset": 10000,
-        "expires": "2013-07-18T17:56:22.186Z"
-    }
+```
+{
+    "url": "https://your-host/uploads/5230ec1f59d1485d9d7974b853802e31",
+    "offset": 10000,
+    "expires": "2013-07-18T17:56:22.186Z"
+}
+```
 
 3. Repeatedly PUT subsequent chunks to the `url` returned from the server.
    Example:
 
-   # PUT to https://your-host/uploads/5230ec1f59d1485d9d7974b853802e31
+```python
+# PUT to https://your-host/<path_to_view>/5230ec1f59d1485d9d7974b853802e31
 
-    {
-        "my_file": <File>
-    }
+{
+    "my_file": <File>
+}
+```
 
 4. Server will continue responding with the `url`,
    current `offset` and expiration (`expires`).
@@ -65,11 +71,13 @@ Typical usage
    This request must include the ``md5`` checksum (hex) of the entire file.
    Example:
 
-    # POST to https://your-host/uploads/5230ec1f59d1485d9d7974b853802e31
-    
-    {
-        "md5": "fc3ff98e8c6a0d3087d515c0473f8677"
-    }
+```python
+# POST to https://your-host/uploads/5230ec1f59d1485d9d7974b853802e31
+
+{
+    "md5": "fc3ff98e8c6a0d3087d515c0473f8677"
+}
+```
 
 6. If everything is OK, server will response with status code 200 and the data returned in the method `get_response_data` (if any).
 
