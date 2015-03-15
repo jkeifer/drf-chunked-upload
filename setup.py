@@ -8,7 +8,7 @@ except ImportError:
 with open('VERSION.txt', 'r') as v:
     version = v.read().strip()
 
-with open('README.rst', 'r') as r:
+with open('README.md', 'r') as r:
     readme = r.read()
 
 download_url = (
