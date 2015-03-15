@@ -1,5 +1,5 @@
-django-chunked-upload
-=====================
+drf-chunked-upload
+==================
 
 This simple django app enables users to upload large files to
 Django Rest Framework in multiple chunks, with the ability to
