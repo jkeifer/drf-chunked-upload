@@ -34,7 +34,7 @@ class ChunkedUpload(models.Model):
                             storage=STORAGE)
     filename = models.CharField(max_length=255)
     user = models.ForeignKey(AUTH_USER_MODEL,
-                             related_name='chunked_uploads',
+                             related_name="%(class)s",
                              editable=False)
     offset = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True,
