@@ -56,17 +56,12 @@ class ChunkedUpload(models.Model):
     def md5(self, rehash=False):
         if getattr(self, '_md5', None) is None or rehash is True:
             md5 = hashlib.md5()
-            print 66
-            try:
-                self.close_file()
-                self.file.open(mode='rb')
-                for chunk in self.file.chunks():
-                    md5.update(chunk)
-                    self._md5 = md5.hexdigest()
-                self.close_file()
-            except Exception as e:
-                print e
-            print self._md5
+            self.close_file()
+            self.file.open(mode='rb')
+            for chunk in self.file.chunks():
+                md5.update(chunk)
+                self._md5 = md5.hexdigest()
+            self.close_file()
         return self._md5
 
     def delete(self, delete_file=True, *args, **kwargs):
@@ -77,7 +72,7 @@ class ChunkedUpload(models.Model):
 
     def __unicode__(self):
         return u'<%s - upload_id: %s - bytes: %s - status: %s>' % (
-            self.filename, self.upload_id, self.offset, self.status)
+            self.filename, self.id, self.offset, self.status)
 
     def close_file(self):
         """

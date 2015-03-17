@@ -24,6 +24,10 @@ class ChunkedUploadBaseView(GenericAPIView):
     model = ChunkedUpload
     serializer_class = ChunkedUploadSerializer
 
+    @property
+    def response_serializer_class(self):
+        return self.serializer_class
+
     def get_queryset(self):
         """
         Get (and filter) ChunkedUpload queryset.
@@ -42,39 +46,39 @@ class ChunkedUploadBaseView(GenericAPIView):
         """
         return {}
 
-    def _post(self, request, *args, **kwargs):
+    def _post(self, request, pk=None, *args, **kwargs):
         raise NotImplementedError
 
-    def _put(self, request, *args, **kwargs):
+    def _put(self, request, pk=None, *args, **kwargs):
         raise NotImplementedError
 
-    def _get(self, request, *args, **kwargs):
+    def _get(self, request, pk=None, *args, **kwargs):
         raise NotImplementedError
 
-    def put(self, request, *args, **kwargs):
+    def put(self, request, pk=None, *args, **kwargs):
         """
         Handle PUT requests.
         """
         try:
-            return self._put(request, *args, **kwargs)
+            return self._put(request, pk=pk, *args, **kwargs)
         except ChunkedUploadError as error:
             return Response(error.data, status=error.status_code)
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, pk=None, *args, **kwargs):
         """
         Handle POST requests.
         """
         try:
-            return self._post(request, *args, **kwargs)
+            return self._post(request, pk=pk, *args, **kwargs)
         except ChunkedUploadError as error:
             return Response(error.data, status=error.status_code)
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request, pk=None, *args, **kwargs):
         """
         Handle GET requests.
         """
         try:
-            return self._get(request, *args, **kwargs)
+            return self._get(request, pk=pk, *args, **kwargs)
         except ChunkedUploadError as error:
             return Response(error.data, status=error.status_code)
 
@@ -98,7 +102,7 @@ class ChunkedUploadView(ChunkedUploadBaseView):
     )
     max_bytes = MAX_BYTES  # Max amount of data that can be uploaded
 
-    def on_completion(self, uploaded_file, request):
+    def on_completion(self, chunked_upload, request):
         """
         Placeholder method to define what to do when upload is complete.
         """
@@ -197,8 +201,8 @@ class ChunkedUploadView(ChunkedUploadBaseView):
     def _put(self, request, pk=None, *args, **kwargs):
         chunked_upload = self._put_chunk(request, pk=pk, *args, **kwargs)
         return Response(
-            self.serializer_class(chunked_upload,
-                                  context={'request': request}).data,
+            self.response_serializer_class(chunked_upload,
+                                           context={'request': request}).data,
             status=status.HTTP_200_OK
         )
 
@@ -206,7 +210,6 @@ class ChunkedUploadView(ChunkedUploadBaseView):
         """
         Verify if md5 checksum sent by client matches generated md5.
         """
-        print md5
         if chunked_upload.md5 != md5:
             chunked_upload.status = FAILED
             chunked_upload.save()
@@ -221,10 +224,9 @@ class ChunkedUploadView(ChunkedUploadBaseView):
             chunked_upload = self._put_chunk(request, *args,
                                              whole=True, **kwargs)
             upload_id = chunked_upload.id
-            print upload_id
 
         md5 = request.data.get('md5')
-        print md5
+
         error_msg = None
         if self.do_md5_check:
             if not upload_id or not md5:
@@ -247,9 +249,12 @@ class ChunkedUploadView(ChunkedUploadBaseView):
         chunked_upload.status = COMPLETE
         chunked_upload.completed_at = timezone.now()
         chunked_upload.save()
-        self.on_completion(chunked_upload.get_uploaded_file(), request)
-        return Response(self.serializer_class(chunked_upload, context={'request': request}).data,
-                        status=status.HTTP_200_OK)
+        self.on_completion(chunked_upload, request)
+        return Response(
+            self.response_serializer_class(chunked_upload,
+                                           context={'request': request}).data,
+            status=status.HTTP_200_OK
+        )
 
     def _get(self, request, pk=None, *args, **kwargs):
         uploads = self.get_queryset()

@@ -1,8 +1,4 @@
-#!/usr/bin/env python
-
-try:
-    from setuptools import setup
-except ImportError:
+pt ImportError:
     from distutils.core import setup
 
 with open('VERSION.txt', 'r') as v:
@@ -23,7 +19,7 @@ setup(
     description=('Upload large files to Django REST Framework in multiple chunks,'
                  ' with the ability to resume if the upload is interrupted.'),
     long_description=readme,
-    author='Jarret Keifer',
+    author='Jarrett Keifer',
     author_email='jkeifer0@gmail.com',
     url='https://github.com/jkeifer/drf-chunked-upload',
     download_url=download_url % version,

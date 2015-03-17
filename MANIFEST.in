@@ -1,3 +1,3 @@
-recursive-include chunked_upload *
+recursive-include drf_chunked_upload *
 include *.md
 include *.txt
