@@ -16,7 +16,7 @@ setup(
     name='drf-chunked-upload',
     packages=['drf_chunked_upload'],
     version=version,
-    description=('Upload large files to Django REST Framework in multiple chunks,'
+    description=('Upload large files to Django REST Framework in multiple chunks,' +
                  ' with the ability to resume if the upload is interrupted.'),
     long_description=readme,
     author='Jarrett Keifer',
