@@ -1,4 +1,8 @@
-pt ImportError:
+#!/usr/bin/env python
+
+try:
+    from setuptools import setup
+except ImportError:
     from distutils.core import setup
 
 with open('VERSION.txt', 'r') as v:
