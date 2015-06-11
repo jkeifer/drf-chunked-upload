@@ -166,7 +166,7 @@ class ChunkedUploadView(ChunkedUploadBaseView):
         if whole:
             start = 0
             total = chunk.size
-            end = total - 1
+            end = total
         else:
             content_range = request.META.get('HTTP_CONTENT_RANGE', '')
             match = self.content_range_pattern.match(content_range)
