@@ -14,21 +14,13 @@ from .constants import CHUNKED_UPLOAD_CHOICES, UPLOADING
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
 
-def generate_id():
-    return uuid.uuid4().hex
-
-
 def generate_filename(instance, filename):
     filename = os.path.join(UPLOAD_PATH, instance.id + '.part')
     return time.strftime(filename)
 
 
 class ChunkedUpload(models.Model):
-    id = models.CharField(max_length=32,
-                          unique=True,
-                          editable=False,
-                          default=generate_id,
-                          primary_key=True)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     file = models.FileField(max_length=255,
                             upload_to=generate_filename,
                             storage=STORAGE)
