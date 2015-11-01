@@ -15,7 +15,7 @@ AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
 
 def generate_filename(instance, filename):
-    filename = os.path.join(UPLOAD_PATH, instance.id + '.part')
+    filename = os.path.join(UPLOAD_PATH, str(instance.id) + '.part')
     return time.strftime(filename)
 
 
