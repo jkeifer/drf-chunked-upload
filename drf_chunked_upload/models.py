@@ -9,7 +9,6 @@ from django.core.files.uploadedfile import UploadedFile
 from django.utils import timezone
 
 from .settings import EXPIRATION_DELTA, UPLOAD_PATH, STORAGE, ABSTRACT_MODEL
-from .constants import CHUNKED_UPLOAD_CHOICES, UPLOADING
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
@@ -20,6 +19,14 @@ def generate_filename(instance, filename):
 
 
 class ChunkedUpload(models.Model):
+    UPLOADING = 1
+    COMPLETE = 2
+    FAILED = 3
+    STATUS_CHOICES = (
+        (UPLOADING, 'Uploading'),
+        (COMPLETE, 'Complete'),
+        (FAILED, 'Failed'),
+    )
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     file = models.FileField(max_length=255,
                             upload_to=generate_filename,
@@ -31,7 +38,7 @@ class ChunkedUpload(models.Model):
     offset = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True,
                                       editable=False)
-    status = models.PositiveSmallIntegerField(choices=CHUNKED_UPLOAD_CHOICES,
+    status = models.PositiveSmallIntegerField(choices=STATUS_CHOICES,
                                               default=UPLOADING)
     completed_at = models.DateTimeField(null=True,
                                         blank=True)

@@ -11,7 +11,6 @@ from django.utils import timezone
 from .settings import MAX_BYTES, USER_RESTRICTED
 from .models import ChunkedUpload
 from .serializers import ChunkedUploadSerializer
-from .constants import COMPLETE, FAILED
 from .exceptions import ChunkedUploadError
 
 
@@ -135,10 +134,10 @@ class ChunkedUploadView(ChunkedUploadBaseView):
             raise ChunkedUploadError(status=status.HTTP_410_GONE,
                                      detail='Upload has expired')
         error_msg = 'Upload has already been marked as "%s"'
-        if chunked_upload.status == COMPLETE:
+        if chunked_upload.status == chunked_upload.COMPLETE:
             raise ChunkedUploadError(status=status.HTTP_400_BAD_REQUEST,
                                      detail=error_msg % 'complete')
-        if chunked_upload.status == FAILED:
+        if chunked_upload.status == chunked_upload.FAILED:
             raise ChunkedUploadError(status=status.HTTP_400_BAD_REQUEST,
                                      detail=error_msg % 'failed')
 
@@ -211,7 +210,7 @@ class ChunkedUploadView(ChunkedUploadBaseView):
         Verify if md5 checksum sent by client matches generated md5.
         """
         if chunked_upload.md5 != md5:
-            chunked_upload.status = FAILED
+            chunked_upload.status = chunked_upload.FAILED
             chunked_upload.save()
             raise ChunkedUploadError(status=status.HTTP_400_BAD_REQUEST,
                                      detail='md5 checksum does not match')
@@ -246,7 +245,7 @@ class ChunkedUploadView(ChunkedUploadBaseView):
         if self.do_md5_check:
             self.md5_check(chunked_upload, md5)
 
-        chunked_upload.status = COMPLETE
+        chunked_upload.status = chunked_upload.COMPLETE
         chunked_upload.completed_at = timezone.now()
         chunked_upload.save()
         self.on_completion(chunked_upload, request)

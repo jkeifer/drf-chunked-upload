@@ -6,7 +6,7 @@ from django.utils.translation import ugettext as _
 
 from .settings import EXPIRATION_DELTA
 from .models import ChunkedUpload
-from .constants import UPLOADING, COMPLETE, FAILED
+
 
 prompt_msg = _(u'Do you want to delete {obj}?')
 
@@ -29,7 +29,11 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         interactive = options.get('interactive')
 
-        count = {UPLOADING: 0, COMPLETE: 0, FAILED: 0}
+        count = {
+            self.model.UPLOADING: 0,
+            self.model.COMPLETE: 0,
+            self.model.FAILED: 0
+        }
         qs = self.model.objects.all()
         qs = qs.filter(created_on__gte=(timezone.now() - EXPIRATION_DELTA))
 
@@ -46,6 +50,6 @@ class Command(BaseCommand):
             # Deleting objects individually to call delete method explicitly
             chunked_upload.delete()
 
-        print '%i complete uploads were deleted.' % count[COMPLETE]
-        print '%i incomplete uploads were deleted.' % count[UPLOADING]
-        print '%i failed uploads were deleted.' % count[FAILED]
+        print '%i complete uploads were deleted.' % count[self.model.COMPLETE]
+        print '%i incomplete uploads were deleted.' % count[self.model.UPLOADING]
+        print '%i failed uploads were deleted.' % count[self.model.FAILED]
