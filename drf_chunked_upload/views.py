@@ -2,6 +2,7 @@ import re
 
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
+from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework import status
 
 from django.shortcuts import get_object_or_404
@@ -82,7 +83,8 @@ class ChunkedUploadBaseView(GenericAPIView):
             return Response(error.data, status=error.status_code)
 
 
-class ChunkedUploadView(ChunkedUploadBaseView):
+class ChunkedUploadView(ListModelMixin, RetrieveModelMixin,
+                        ChunkedUploadBaseView):
     """
     Uploads large files in multiple chunks. Also, has the ability to resume
     if the upload is interrupted. PUT without upload ID to create an upload
@@ -256,12 +258,8 @@ class ChunkedUploadView(ChunkedUploadBaseView):
         )
 
     def _get(self, request, pk=None, *args, **kwargs):
-        uploads = self.get_queryset()
-
         if pk:
-            upload = get_object_or_404(self.get_queryset(),
-                                       pk=pk)
-            serializer = self.serializer_class(upload, context={'request': request})
+            return self.retrieve(request, pk=pk, *args, **kwargs)
         else:
-            serializer = self.serializer_class(uploads, many=True, context={'request': request})
-        return Response(serializer.data)
+            return self.list(request, *args, **kwargs)
+
