@@ -1,11 +1,15 @@
+from __future__ import print_function
+
 from optparse import make_option
+from collections import Counter
+from six import iteritems
 
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from django.utils.translation import ugettext as _
 
-from .settings import EXPIRATION_DELTA
-from .models import ChunkedUpload
+from drf_chunked_upload.settings import EXPIRATION_DELTA
+from drf_chunked_upload.models import ChunkedUpload
 
 
 prompt_msg = _(u'Do you want to delete {obj}?')
@@ -29,15 +33,13 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         interactive = options.get('interactive')
 
-        count = {
-            self.model.UPLOADING: 0,
-            self.model.COMPLETE: 0,
-            self.model.FAILED: 0
-        }
-        qs = self.model.objects.all()
-        qs = qs.filter(created_on__gte=(timezone.now() - EXPIRATION_DELTA))
+        count = Counter([state[0] for state in self.model.STATUS_CHOICES])
 
-        for chunked_upload in qs:
+        uploads = self.model.objects.filter(
+            created_on__lt=(timezone.now() - EXPIRATION_DELTA)
+        )
+
+        for chunked_upload in uploads:
             if interactive:
                 prompt = prompt_msg.format(obj=chunked_upload) + u' (y/n): '
                 answer = raw_input(prompt).lower()
@@ -50,6 +52,11 @@ class Command(BaseCommand):
             # Deleting objects individually to call delete method explicitly
             chunked_upload.delete()
 
-        print '%i complete uploads were deleted.' % count[self.model.COMPLETE]
-        print '%i incomplete uploads were deleted.' % count[self.model.UPLOADING]
-        print '%i failed uploads were deleted.' % count[self.model.FAILED]
+        for state, number in iteritems(count):
+            print(
+                '{} {} uploads were deleted.'.format(
+                    number,
+                    self.model.STATUS_CHOICES[state].lower(),
+                )
+            )
+
