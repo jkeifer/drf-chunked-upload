@@ -22,11 +22,9 @@ class ChunkedUpload(models.Model):
     upload_dir = UPLOAD_PATH
     UPLOADING = 1
     COMPLETE = 2
-    FAILED = 3
     STATUS_CHOICES = (
-        (UPLOADING, 'Uploading'),
+        (UPLOADING, 'Incomplete'),
         (COMPLETE, 'Complete'),
-        (FAILED, 'Failed'),
     )
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     file = models.FileField(max_length=255,
