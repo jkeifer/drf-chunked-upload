@@ -7,7 +7,6 @@ from rest_framework import status
 
 from django.shortcuts import get_object_or_404
 from django.core.files.base import ContentFile
-from django.utils import timezone
 
 from .settings import MAX_BYTES, USER_RESTRICTED
 from .models import ChunkedUpload
