@@ -34,7 +34,7 @@ class ChunkedUpload(models.Model):
     user = models.ForeignKey(AUTH_USER_MODEL,
                              related_name="%(class)s",
                              editable=False)
-    offset = models.PositiveIntegerField(default=0)
+    offset = models.BigIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True,
                                       editable=False)
     status = models.PositiveSmallIntegerField(choices=STATUS_CHOICES,
