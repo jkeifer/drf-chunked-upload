@@ -8,13 +8,20 @@ from django.conf import settings
 from django.core.files.uploadedfile import UploadedFile
 from django.utils import timezone
 
-from .settings import EXPIRATION_DELTA, UPLOAD_PATH, STORAGE, ABSTRACT_MODEL
+from .settings import (
+    EXPIRATION_DELTA,
+    UPLOAD_PATH,
+    STORAGE,
+    ABSTRACT_MODEL,
+    COMPLETE_EXT,
+    INCOMPLETE_EXT,
+)
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
 
 def generate_filename(instance, filename):
-    filename = os.path.join(instance.upload_dir, str(instance.id) + '.part')
+    filename = os.path.join(instance.upload_dir, str(instance.id) + INCOMPLETE_EXT)
     return time.strftime(filename)
 
 
@@ -106,5 +113,23 @@ class ChunkedUpload(models.Model):
         return UploadedFile(file=self.file, name=self.filename,
                             size=self.offset)
 
+    def completed(self, completed_at=timezone.now(), ext=COMPLETE_EXT):
+        if ext != INCOMPLETE_EXT:
+            try:
+                os.rename(
+                    self.file.path,
+                    os.path.splitext(self.file.path)[0] + ext,
+                )
+            except OSError:
+                # probably need better handling here to
+                # send logging to django.log or something
+                pass
+            else:
+                self.file.name = os.path.splitext(self.file.name)[0] + ext
+        self.status = self.COMPLETE
+        self.completed_at = completed_at
+        self.save()
+
     class Meta:
         abstract = ABSTRACT_MODEL
+

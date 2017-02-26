@@ -242,9 +242,8 @@ class ChunkedUploadView(ListModelMixin, RetrieveModelMixin,
         if self.do_md5_check:
             self.md5_check(chunked_upload, md5)
 
-        chunked_upload.status = chunked_upload.COMPLETE
-        chunked_upload.completed_at = timezone.now()
-        chunked_upload.save()
+        chunked_upload.completed()
+
         self.on_completion(chunked_upload, request)
         return Response(
             self.response_serializer_class(chunked_upload,

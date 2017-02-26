@@ -110,8 +110,20 @@ Add any of these variables into your project settings to override them.
 
 **`DRF_CHUNKED_UPLOAD_PATH`**
 
-- Path where uploading files will be stored until completion.
+- Path where uploaded files will be stored.
 - Default: `'chunked_uploads/%Y/%m/%d'`
+
+**`DRF_CHUNKED_UPLOAD_COMPLETE_EXT`**
+
+- Extension to use for completed uploads.
+  Uploads will be renamed using this extension on completion,
+  unless this extension matched DRF_CHUNKED_UPLOAD_INCOMPLETE_EXT.
+- Default: `'.done'`
+
+**`DRF_CHUNKED_UPLOAD_INCOMPLETE_EXT`**
+
+- Extension for in progress upload files.
+- Default: `'.part'`
 
 **`DRF_CHUNKED_UPLOAD_STORAGE_CLASS`**
 
@@ -121,18 +133,18 @@ Add any of these variables into your project settings to override them.
 **`DRF_CHUNKED_UPLOAD_USER_RESTRICED`**
 
 - Boolean that determines whether only the user who created
-  an upload can view/continue an upload
+  an upload can view/continue an upload.
 - Default: `True`
 
 **`DRF_CHUNKED_UPLOAD_ABSTRACT_MODEL`**
 
 - Boolean that defines if the `ChunkedUpload` model will be abstract or not
-  ([what does abstract model mean?](https://docs.djangoproject.com/en/1.4/ref/models/options/#abstract))
+  ([what does abstract model mean?](https://docs.djangoproject.com/en/1.4/ref/models/options/#abstract)).
 - Default: `True`
 
 **`DRF_CHUNKED_UPLOAD_MAX_BYTES`**
 
-- Max amount of data (in bytes) that can be uploaded. `None` means no limit
+- Max amount of data (in bytes) that can be uploaded. `None` means no limit.
 - Default: `None`
 
 
@@ -142,3 +154,4 @@ Support
 If you find any bug or you want to propose a new feature,
 please use the [issues tracker](https://github.com/jkeifer/drf-chunked-upload/issues).
 Pull requests are also accepted.
+
