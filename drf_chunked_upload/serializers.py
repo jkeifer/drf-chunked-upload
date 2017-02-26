@@ -13,4 +13,6 @@ class ChunkedUploadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ChunkedUpload
+        fields = '__all__'
         read_only_fields = ('status', 'completed_at')
+
