@@ -17,7 +17,7 @@ Installation
 
 Install via pip:
 
-    pip install https://github.com/jkeifer/drf-chunked-upload/zipball/master 
+    pip install drf-chunked-upload
 
 And then add it to your Django `INSTALLED_APPS`:
 
