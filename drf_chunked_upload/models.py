@@ -3,7 +3,7 @@ import os.path
 import hashlib
 import uuid
 
-from django.db import models
+from django.db import models, transaction
 from django.conf import settings
 from django.core.files.uploadedfile import UploadedFile
 from django.utils import timezone
@@ -69,6 +69,7 @@ class ChunkedUpload(models.Model):
             self.close_file()
         return self._md5
 
+    @transaction.atomic
     def delete(self, delete_file=True, *args, **kwargs):
         if self.file:
             storage, path = self.file.storage, self.file.path
@@ -113,22 +114,19 @@ class ChunkedUpload(models.Model):
         return UploadedFile(file=self.file, name=self.filename,
                             size=self.offset)
 
+    @transaction.atomic
     def completed(self, completed_at=timezone.now(), ext=COMPLETE_EXT):
         if ext != INCOMPLETE_EXT:
-            try:
-                os.rename(
-                    self.file.path,
-                    os.path.splitext(self.file.path)[0] + ext,
-                )
-            except OSError:
-                # probably need better handling here to
-                # send logging to django.log or something
-                pass
-            else:
-                self.file.name = os.path.splitext(self.file.name)[0] + ext
+            original_path = self.file.path
+            self.file.name = os.path.splitext(self.file.name)[0] + ext
         self.status = self.COMPLETE
         self.completed_at = completed_at
         self.save()
+        if ext != INCOMPLETE_EXT:
+            os.rename(
+                original_path,
+                os.path.splitext(self.file.path)[0] + ext,
+            )
 
     class Meta:
         abstract = ABSTRACT_MODEL
