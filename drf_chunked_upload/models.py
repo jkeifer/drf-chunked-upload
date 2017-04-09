@@ -70,13 +70,18 @@ class ChunkedUpload(models.Model):
             self.close_file()
         return self._md5
 
-    @transaction.atomic
-    def delete(self, delete_file=True, *args, **kwargs):
+    def delete_file(self):
         if self.file:
             storage, path = self.file.storage, self.file.path
-        super(ChunkedUpload, self).delete(*args, **kwargs)
-        if self.file and delete_file:
             storage.delete(path)
+        self.file = None
+
+    @transaction.atomic
+    def delete(self, delete_file=True, *args, **kwargs): 
+        super(ChunkedUpload, self).delete(*args, **kwargs)
+        if delete_file:
+            self.delete_file()
+            
 
     def __unicode__(self):
         return u'<%s - upload_id: %s - bytes: %s - status: %s>' % (
