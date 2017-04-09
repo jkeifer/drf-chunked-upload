@@ -44,15 +44,24 @@ class Command(BaseCommand):
             default=False,
             help='Prompt for confirmation before each deletion.',
         )
+        parser.add_argument(
+            '-k',
+            '--keep-record',
+            action='store_false',
+            dest='delete_record',
+            default=True,
+            help="Don't delete upload records, just uploaded files on disk.",
+        )
 
     def handle(self, *args, **options):
         filter_models = options.get('models', None)
         interactive = options.get('interactive')
+        delete_record = options.get('delete_record')
 
         upload_models = self.get_models(filter_models=filter_models)
 
         for model in upload_models:
-            self.process_model(model, interactive=interactive)
+            self.process_model(model, interactive=interactive, delete_record=delete_record)
 
     def _get_filter_model(self, model):
         model_app, model_name = model.split('.')
@@ -84,7 +93,7 @@ class Command(BaseCommand):
 
         return upload_models
 
-    def process_model(self, model, interactive=False):
+    def process_model(self, model, interactive=False, delete_record=True):
         print('Processing uploads for model {}.{}...'.format(
             model._meta.app_label,
             model.__name__,
@@ -96,19 +105,27 @@ class Command(BaseCommand):
             created_at__lt=(timezone.now() - EXPIRATION_DELTA)
         )
 
+        if delete_record == False:
+            chunked_uploads = chunked_uploads.exclude(file__isnull=True)
+
         for chunked_upload in chunked_uploads:
             if interactive and not self.get_confirmation(chunked_upload):
                 continue
 
             count[chunked_upload.status] += 1
             # Deleting objects individually to call delete method explicitly
-            chunked_upload.delete()
+            if delete_record:
+                chunked_upload.delete()
+            else:
+                chunked_upload.delete_file()
+                chunked_upload.save()
 
         for state, number in iteritems(count):
             print(
-                '{} {} uploads were deleted.'.format(
+                '{} {} upload{}s were deleted.'.format(
                     number,
                     dict(model.STATUS_CHOICES)[state].lower(),
+                    (' file' if not delete_record else ''),
                 )
             )
 
