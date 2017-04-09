@@ -36,7 +36,8 @@ class ChunkedUpload(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     file = models.FileField(max_length=255,
                             upload_to=generate_filename,
-                            storage=STORAGE)
+                            storage=STORAGE,
+                            null=True)
     filename = models.CharField(max_length=255)
     user = models.ForeignKey(AUTH_USER_MODEL,
                              related_name="%(class)s",
