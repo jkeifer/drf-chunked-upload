@@ -140,25 +140,11 @@ class ChunkedUploadView(ListModelMixin, RetrieveModelMixin,
                                      detail=error_msg % 'complete')
 
     def _put_chunk(self, request, pk=None, whole=False, *args, **kwargs):
-        chunk = request.data.get(self.field_name)
-        if chunk is None:
+        try:
+            chunk = request.data[self.field_name]
+        except KeyError:
             raise ChunkedUploadError(status=status.HTTP_400_BAD_REQUEST,
                                      detail='No chunk file was submitted')
-
-        if pk:
-            upload_id = pk
-            chunked_upload = get_object_or_404(self.get_queryset(),
-                                               pk=upload_id)
-            self.is_valid_chunked_upload(chunked_upload)
-        else:
-            user = request.user if request.user.is_authenticated() else None
-            chunked_upload = self.serializer_class(data=request.data)
-            if not chunked_upload.is_valid():
-                raise ChunkedUploadError(status=status.HTTP_400_BAD_REQUEST,
-                                         detail=chunked_upload.errors)
-            # chunked_upload is currently a serializer;
-            # save returns model instance
-            chunked_upload = chunked_upload.save(user=user)
 
         if whole:
             start = 0
@@ -183,15 +169,31 @@ class ChunkedUploadView(ListModelMixin, RetrieveModelMixin,
                 status=status.HTTP_400_BAD_REQUEST,
                 detail='Size of file exceeds the limit (%s bytes)' % max_bytes
             )
-        if chunked_upload.offset != start:
-            raise ChunkedUploadError(status=status.HTTP_400_BAD_REQUEST,
-                                     detail='Offsets do not match',
-                                     offset=chunked_upload.offset)
+
         if chunk.size != chunk_size:
             raise ChunkedUploadError(status=status.HTTP_400_BAD_REQUEST,
                                      detail="File size doesn't match headers: file size is {} but {} reported".format(chunk.size, chunk_size))
 
-        chunked_upload.append_chunk(chunk, chunk_size=chunk_size)
+        if pk:
+            upload_id = pk
+            chunked_upload = get_object_or_404(self.get_queryset(),
+                                               pk=upload_id)
+            self.is_valid_chunked_upload(chunked_upload)
+            if chunked_upload.offset != start:
+                raise ChunkedUploadError(status=status.HTTP_400_BAD_REQUEST,
+                                         detail='Offsets do not match',
+                                         offset=chunked_upload.offset)
+
+            chunked_upload.append_chunk(chunk, chunk_size=chunk_size)
+        else:
+            user = request.user if request.user.is_authenticated() else None
+            chunked_upload = self.serializer_class(data=request.data)
+            if not chunked_upload.is_valid():
+                raise ChunkedUploadError(status=status.HTTP_400_BAD_REQUEST,
+                                         detail=chunked_upload.errors)
+            # chunked_upload is currently a serializer;
+            # save returns model instance
+            chunked_upload = chunked_upload.save(user=user, offset=chunk.size)
 
         return chunked_upload
 
