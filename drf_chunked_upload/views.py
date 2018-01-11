@@ -161,7 +161,7 @@ class ChunkedUploadView(ListModelMixin, RetrieveModelMixin,
             end = int(match.group('end'))
             total = int(match.group('total'))
 
-        chunk_size = end - start
+        chunk_size = end - start + 1
         max_bytes = self.get_max_bytes(request)
 
         if max_bytes is not None and total > max_bytes:
