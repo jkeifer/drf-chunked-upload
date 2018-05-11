@@ -40,7 +40,7 @@ class ChunkedUploadBaseView(GenericAPIView):
         """
         queryset = self.model.objects.all()
         if USER_RESTRICTED:
-            if is_authenticated(request.user):
+            if is_authenticated(self.request.user):
                 queryset = queryset.filter(user=self.request.user)
         return queryset
 
