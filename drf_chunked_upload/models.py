@@ -41,7 +41,8 @@ class ChunkedUpload(models.Model):
     filename = models.CharField(max_length=255)
     user = models.ForeignKey(AUTH_USER_MODEL,
                              related_name="%(class)s",
-                             editable=False)
+                             editable=False,
+                             on_delete=models.CASCADE)
     offset = models.BigIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True,
                                       editable=False)

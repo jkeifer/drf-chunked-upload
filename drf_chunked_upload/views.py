@@ -14,6 +14,12 @@ from .serializers import ChunkedUploadSerializer
 from .exceptions import ChunkedUploadError
 
 
+def is_authenticated(user):
+    if callable(user.is_authenticated):
+        return user.is_authenticated()
+    return user.is_authenticated
+
+
 class ChunkedUploadBaseView(GenericAPIView):
     """
     Base view for the rest of chunked upload views.
@@ -34,7 +40,7 @@ class ChunkedUploadBaseView(GenericAPIView):
         """
         queryset = self.model.objects.all()
         if USER_RESTRICTED:
-            if self.request.user.is_authenticated():
+            if is_authenticated(self.request.user):
                 queryset = queryset.filter(user=self.request.user)
         return queryset
 
@@ -186,7 +192,7 @@ class ChunkedUploadView(ListModelMixin, RetrieveModelMixin,
 
             chunked_upload.append_chunk(chunk, chunk_size=chunk_size)
         else:
-            user = request.user if request.user.is_authenticated() else None
+            user = request.user if is_authenticated(request.user) else None
             chunked_upload = self.serializer_class(data=request.data)
             if not chunked_upload.is_valid():
                 raise ChunkedUploadError(status=status.HTTP_400_BAD_REQUEST,
@@ -257,4 +263,3 @@ class ChunkedUploadView(ListModelMixin, RetrieveModelMixin,
             return self.retrieve(request, pk=pk, *args, **kwargs)
         else:
             return self.list(request, *args, **kwargs)
-
