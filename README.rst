@@ -170,7 +170,7 @@ Typical usage
 .. code:: python
 
     {
-        "url": "https://your-host/<path_to_view>/5230ec1f59d1485d9d7974b853802e31",
+        "url": "https://your-host/<path_to_view>/2127a2f7-075b-41a9-8f73-adaa07fe91f2",
         "offset": 10000,
         "expires": "2013-07-18T17:56:22.186Z"
     }
@@ -180,7 +180,7 @@ Typical usage
 
 .. code:: python
 
-    # PUT to https://your-host/<path_to_view>/5230ec1f59d1485d9d7974b853802e31
+    # PUT to https://your-host/<path_to_view>/2127a2f7-075b-41a9-8f73-adaa07fe91f2
     # or using the form-data
 
     {
@@ -197,7 +197,7 @@ Typical usage
 
 .. code:: python
 
-    # POST to https://your-host/<path_to_view>/5230ec1f59d1485d9d7974b853802e31
+    # POST to https://your-host/<path_to_view>/2127a2f7-075b-41a9-8f73-adaa07fe91f2
 
     {
         "md5": "fc3ff98e8c6a0d3087d515c0473f8677"
