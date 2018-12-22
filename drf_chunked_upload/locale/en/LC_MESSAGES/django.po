@@ -1,0 +1,170 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-12-22 18:14+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+#: packages/drf_chunked_upload/drf_chunked_upload/admin.py:16
+#: packages/drf_chunked_upload/drf_chunked_upload/models.py:83
+msgid "status"
+msgstr ""
+
+#: packages/drf_chunked_upload/drf_chunked_upload/admin.py:17
+msgid "general"
+msgstr ""
+
+#: packages/drf_chunked_upload/drf_chunked_upload/admin.py:18
+msgid "owner"
+msgstr ""
+
+#: packages/drf_chunked_upload/drf_chunked_upload/admin.py:24
+msgid "file type"
+msgstr ""
+
+#: packages/drf_chunked_upload/drf_chunked_upload/management/commands/delete_expired_uploads.py:13
+#, python-brace-format
+msgid "Do you want to delete {obj}-{status}?"
+msgstr ""
+
+#: packages/drf_chunked_upload/drf_chunked_upload/models.py:50
+msgid "Incomplete"
+msgstr ""
+
+#: packages/drf_chunked_upload/drf_chunked_upload/models.py:51
+msgid "Complete"
+msgstr ""
+
+#: packages/drf_chunked_upload/drf_chunked_upload/models.py:52
+msgid "Aborted"
+msgstr ""
+
+#: packages/drf_chunked_upload/drf_chunked_upload/models.py:62
+msgid "id"
+msgstr ""
+
+#: packages/drf_chunked_upload/drf_chunked_upload/models.py:64
+msgid "file"
+msgstr ""
+
+#: packages/drf_chunked_upload/drf_chunked_upload/models.py:73
+msgid "file name"
+msgstr ""
+
+#: packages/drf_chunked_upload/drf_chunked_upload/models.py:76
+msgid "creator"
+msgstr ""
+
+#: packages/drf_chunked_upload/drf_chunked_upload/models.py:81
+msgid "offset"
+msgstr ""
+
+#: packages/drf_chunked_upload/drf_chunked_upload/models.py:84
+msgid "created at"
+msgstr ""
+
+#: packages/drf_chunked_upload/drf_chunked_upload/models.py:85
+msgid "completed at"
+msgstr ""
+
+#: packages/drf_chunked_upload/drf_chunked_upload/models.py:89
+msgid "owner type"
+msgstr ""
+
+#: packages/drf_chunked_upload/drf_chunked_upload/models.py:92
+msgid "owner id"
+msgstr ""
+
+#: packages/drf_chunked_upload/drf_chunked_upload/models.py:221
+msgid "The owner doesn't allow to be accessible."
+msgstr ""
+
+#: packages/drf_chunked_upload/drf_chunked_upload/models.py:252
+msgid "chunked upload"
+msgstr ""
+
+#: packages/drf_chunked_upload/drf_chunked_upload/models.py:253
+msgid "chunked uploads"
+msgstr ""
+
+#: packages/drf_chunked_upload/drf_chunked_upload/validators.py:38
+#, python-format
+msgid ""
+"Extension '%(extension)s' not allowed. Allowed extensions are: "
+"'%(allowed_extensions)s.'"
+msgstr ""
+
+#: packages/drf_chunked_upload/drf_chunked_upload/validators.py:39
+#, python-format
+msgid ""
+"MIME type '%(mimetype)s' is not valid. Allowed types are: "
+"%(allowed_mimetypes)s."
+msgstr ""
+
+#: packages/drf_chunked_upload/drf_chunked_upload/validators.py:40
+#, python-format
+msgid ""
+"The current file %(size)s, which is too small. The minimum file size is "
+"%(allowed_size)s."
+msgstr ""
+
+#: packages/drf_chunked_upload/drf_chunked_upload/validators.py:41
+#, python-format
+msgid ""
+"The current file %(size)s, which is too large. The maximum file size is "
+"%(allowed_size)s."
+msgstr ""
+
+#: packages/drf_chunked_upload/drf_chunked_upload/views.py:168
+msgid "Upload has expired"
+msgstr ""
+
+#: packages/drf_chunked_upload/drf_chunked_upload/views.py:170
+msgid "Upload has already been marked as \"complete\""
+msgstr ""
+
+#: packages/drf_chunked_upload/drf_chunked_upload/views.py:179
+msgid "No chunk file was submitted"
+msgstr ""
+
+#: packages/drf_chunked_upload/drf_chunked_upload/views.py:189
+msgid "Error in request headers"
+msgstr ""
+
+#: packages/drf_chunked_upload/drf_chunked_upload/views.py:201
+#, python-format
+msgid "Size of file exceeds the limit (%s bytes)"
+msgstr ""
+
+#: packages/drf_chunked_upload/drf_chunked_upload/views.py:206
+#, python-format
+msgid "File size doesn't match headers: file size is %s but %s reported"
+msgstr ""
+
+#: packages/drf_chunked_upload/drf_chunked_upload/views.py:216
+msgid "Offsets do not match"
+msgstr ""
+
+#: packages/drf_chunked_upload/drf_chunked_upload/views.py:237
+msgid "md5 checksum does not match"
+msgstr ""
+
+#: packages/drf_chunked_upload/drf_chunked_upload/views.py:267
+msgid "Both 'id' and 'md5' are required"
+msgstr ""
+
+#: packages/drf_chunked_upload/drf_chunked_upload/views.py:269
+msgid "'id' is required"
+msgstr ""

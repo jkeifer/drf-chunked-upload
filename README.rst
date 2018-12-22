@@ -3,7 +3,8 @@ drf-chunked-upload
 
 This simple django app enables users to upload large files to Django
 Rest Framework in multiple chunks, with the ability to resume if the
-upload is interrupted.
+upload is interrupted. Moreover, it provides a way for using this upload
+model into other models with the power of Django's generic relations.
 
 This app is based to a large degree on the work of `Julio
 Malegria <https://github.com/juliomalegria>`__, specifically his
@@ -11,6 +12,11 @@ Malegria <https://github.com/juliomalegria>`__, specifically his
 app <https://github.com/juliomalegria/django-chunked-upload>`__.
 
 License: `MIT-Zero <https://romanrm.net/mit-zero>`__.
+
+Demo
+----
+
+If you want to see a very simple Django demo project using this module, please take a look at `drf-chunked-upload-example <https://github.com/m3hrdadfi/drf-chunked-upload-example>`__.
 
 Installation
 ------------
@@ -30,6 +36,109 @@ And then add it to your Django ``INSTALLED_APPS``:
         'drf_chunked_upload',
     )
 
+Quick Setup
+-----------
+1. An initial ``model.py``. Example:
+
+.. code:: python
+
+    from django.db import models
+    from django.contrib.contenttypes.fields import GenericRelation
+    from drf_chunked_upload.models import ChunkedUpload
+
+
+    class Upload(ChunkedUpload):
+        pass
+
+
+    class Person(models.Model):
+        first_name = models.CharField(max_length=30)
+        last_name = models.CharField(max_length=30)
+        avatar = GenericRelation(Upload)
+
+2. An initial ``serializers.py``. Example:
+
+.. code:: python
+
+    from drf_chunked_upload.serializers import (
+        ChunkedUploadSerializer,
+        ChunkedUploadCreatedSerializer
+    )
+    from .models import Upload
+
+
+    class UploadSerializer(ChunkedUploadSerializer):
+        viewname = 'uploads:upload-detail'
+
+        class Meta(ChunkedUploadSerializer.Meta):
+            model = UploadType1
+
+
+    class UploadCreatedSerializer(ChunkedUploadCreatedSerializer):
+        viewname = 'uploads:upload-detail'
+
+        class Meta(ChunkedUploadCreatedSerializer.Meta):
+            model = Upload
+
+
+3. An initial ``view.py``. Example:
+
+.. code:: python
+
+    from drf_chunked_upload.views import ChunkedUploadView
+    from .models import Upload
+
+
+    class UploadView(ChunkedUploadView):
+        model = Upload
+        serializer_class = UploadSerializer
+        max_bytes = Upload.MAX_BYTES
+
+        @property
+        def response_serializer_class(self):
+            serializer_class = self.serializer_class
+            if self.request is None or self.request.method not in ['PUT', 'POST']:
+                serializer_class = UploadCreatedSerializer
+            return serializer_class
+
+
+4. An initial ``urls.py``. Example:
+
+.. code:: python
+
+    from django.urls import re_path
+    from drf_chunked_upload.urls import PK_QUERY
+    from .views import UploadView
+
+    urlpatterns = [
+        re_path(r'^upload/$', UploadView.as_view(), name='upload-list'),
+        re_path(r'^upload/{}/$'.format(PK_QUERY), UploadView.as_view(), name='upload-detail'),
+    ]
+
+4. Change main ``urls.py``. Example:
+
+.. code:: python
+
+    from django.conf import settings
+    from django.contrib import admin
+    from django.urls import path, include
+    from django.conf.urls.static import static
+
+    urlpatterns = [
+        path('admin/', admin.site.urls),
+        path('uploads/', include(('uploads.urls', 'uploads')), name='uploads'),
+    ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+5. An initial ``admin.py``. Example:
+
+.. code:: python
+
+    from django.contrib import admin
+    from .models import Upload
+    from drf_chunked_upload.admin import ChunkedUploadAdmin
+
+    admin.site.register(Upload, ChunkedUploadAdmin)
+
 Typical usage
 -------------
 
@@ -40,13 +149,25 @@ Typical usage
 
 .. code:: python
 
-    {"my_file": file}
+    {
+        "my_file": "file (binary)"
+    }
+
+- Extra: with a custom ``owner_type`` or ``owner_id``. Example:
+
+.. code:: python
+
+    {
+        "my_file": "file (binary)",
+        "owner_type": 5,
+        "owner_id": 2,
+    }
 
 2. In return, the server will respond with the ``url`` of the upload,
    the current ``offset``, and when the upload will expire
    (``expires``). Example:
 
-::
+.. code:: python
 
     {
         "url": "https://your-host/<path_to_view>/5230ec1f59d1485d9d7974b853802e31",
@@ -60,9 +181,11 @@ Typical usage
 .. code:: python
 
     # PUT to https://your-host/<path_to_view>/5230ec1f59d1485d9d7974b853802e31
+    # or using the form-data
 
     {
-        "my_file": file
+        "my_file": "file (binary)",
+        "upload_id: "2127a2f7-075b-41a9-8f73-adaa07fe91f2"
     }
 
 4. Server will continue responding with the ``url``, current ``offset``
@@ -146,9 +269,33 @@ Add any of these variables into your project settings to override them.
    mean? <https://docs.djangoproject.com/en/1.4/ref/models/options/#abstract>`__).
 -  Default: ``True``
 
+``DRF_CHUNKED_UPLOAD_ABSTRACT_ADMIN_MODEL``
+
+-  Boolean that defines if the ``ChunkedUpload`` admin model will be abstract
+   or not.
+-  Default: ``True``
+
+``DRF_CHUNKED_UPLOAD_MIN_BYTES``
+
+-  Max amount of data (in bytes) that can be uploaded. ``0`` means no
+   limit.
+-  Default: ``0``
+
 ``DRF_CHUNKED_UPLOAD_MAX_BYTES``
 
 -  Max amount of data (in bytes) that can be uploaded. ``None`` means no
+   limit.
+-  Default: ``None``
+
+``DRF_CHUNKED_ALLOWED_EXTENSIONS``
+
+-  Allowed file extensions.. ``None`` means no
+   limit.
+-  Default: ``None``
+
+``DRF_CHUNKED_ALLOWED_MIMETYPES``
+
+-  Allowed file mimetypes.. ``None`` means no
    limit.
 -  Default: ``None``
 

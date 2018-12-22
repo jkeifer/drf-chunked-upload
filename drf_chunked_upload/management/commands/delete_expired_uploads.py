@@ -1,18 +1,16 @@
-from __future__ import print_function
-
 from collections import Counter
 from six import iteritems
 
 import django.apps
 from django.core.management.base import BaseCommand
+from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import ugettext as _
 
-from drf_chunked_upload.settings import EXPIRATION_DELTA
-from drf_chunked_upload.models import ChunkedUpload
+from ...settings import EXPIRATION_DELTA
+from ...models import ChunkedUpload
 
-
-PROMPT_MSG = _(u'Do you want to delete {obj}?')
+PROMPT_MSG = _(u'Do you want to delete {obj}-{status}?')
 VALID_RESP = {
     "yes": True,
     "y": True,
@@ -23,7 +21,6 @@ VALID_RESP = {
 
 
 class Command(BaseCommand):
-
     # Has to be a ChunkedUpload subclass
     base_model = ChunkedUpload
 
@@ -35,6 +32,14 @@ class Command(BaseCommand):
             metavar='app.model',
             nargs='*',
             help='Any app.model classes you want to clean up. Default is all ChunkedUpload subclasses within a project.',
+        )
+        parser.add_argument(
+            '-u',
+            '--unfinished',
+            action='store_true',
+            dest='unfinished',
+            default=False,
+            help='Prompt for confirmation all unfinished uploads.',
         )
         parser.add_argument(
             '-i',
@@ -56,12 +61,13 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         filter_models = options.get('models', None)
         interactive = options.get('interactive')
+        unfinished = options.get('unfinished')
         delete_record = options.get('delete_record')
 
         upload_models = self.get_models(filter_models=filter_models)
 
         for model in upload_models:
-            self.process_model(model, interactive=interactive, delete_record=delete_record)
+            self.process_model(model, interactive=interactive, unfinished=unfinished, delete_record=delete_record)
 
     def _get_filter_model(self, model):
         model_app, model_name = model.split('.')
@@ -88,24 +94,34 @@ class Command(BaseCommand):
         else:
             # no models were specified and we want
             # to find all ChunkedUpload classes
-            upload_models = \
-                [m for m in django.apps.apps.get_models() if issubclass(m, self.base_model)]
+            upload_models = [m for m in django.apps.apps.get_models() if issubclass(m, self.base_model)]
 
         return upload_models
 
-    def process_model(self, model, interactive=False, delete_record=True):
+    def process_model(self, model, interactive=False, unfinished=False, delete_record=True):
         print('Processing uploads for model {}.{}...'.format(
             model._meta.app_label,
             model.__name__,
         ))
 
-        count = Counter({state[0]: 0 for state in model.STATUS_CHOICES})
+        states = dict(model.STATUS_CHOICES)
+        if model.COMPLETE in states:
+            del states[model.COMPLETE]
 
-        chunked_uploads = model.objects.filter(
-            created_at__lt=(timezone.now() - EXPIRATION_DELTA)
-        )
+        count = Counter({state: 0 for state in states})
 
-        if delete_record == False:
+        if unfinished:
+            chunked_uploads = model.objects.filter(Q(status=model.UPLOADING) | Q(status=model.ABORTED))
+        else:
+            chunked_uploads = model.objects.filter(
+                Q(
+                    Q(created_at__lt=(timezone.now() - EXPIRATION_DELTA))
+                    &
+                    Q(Q(status=model.UPLOADING) | Q(status=model.ABORTED))
+                )
+            )
+
+        if delete_record:
             chunked_uploads = chunked_uploads.exclude(file__isnull=True)
 
         for chunked_upload in chunked_uploads:
@@ -124,15 +140,16 @@ class Command(BaseCommand):
             print(
                 '{} {} upload{}s were deleted.'.format(
                     number,
-                    dict(model.STATUS_CHOICES)[state].lower(),
+                    dict(states)[state].lower(),
                     (' file' if not delete_record else ''),
                 )
             )
 
     def get_confirmation(self, chunked_upload):
-        prompt = PROMPT_MSG.format(obj=chunked_upload) + u' (y/n): '
+        status = dict(chunked_upload.STATUS_CHOICES).get(chunked_upload.status)
+        prompt = PROMPT_MSG.format(obj=chunked_upload, status=status) + u' (y/n): '
 
         while True not in ('y', 'n'):
-            answer = VALID_RESP.get(raw_input(prompt).lower(), None)
+            answer = VALID_RESP.get(input(prompt).lower(), None)
             if answer is not None:
                 return answer
