@@ -12,6 +12,11 @@ EXPIRATION_DELTA = getattr(settings, 'DRF_CHUNKED_UPLOAD_EXPIRATION_DELTA',
 DEFAULT_UPLOAD_PATH = 'chunked_uploads/%Y/%m/%d'
 UPLOAD_PATH = getattr(settings, 'DRF_CHUNKED_UPLOAD_PATH', DEFAULT_UPLOAD_PATH)
 
+# Checksum type to use when verifying files
+DEFAULT_CHECKSUM_TYPE = 'md5'
+CHECKSUM_TYPE = getattr(settings, 'DRF_CHUNKED_UPLOAD_CHECKSUM',
+                        DEFAULT_CHECKSUM_TYPE)
+
 # File extensions for upload files
 COMPLETE_EXT = getattr(settings, 'DRF_CHUNKED_UPLOAD_COMPLETE_EXT', '.done')
 INCOMPLETE_EXT = getattr(settings, 'DRF_CHUNKED_UPLOAD_INCOMPLETE_EXT', '.part')

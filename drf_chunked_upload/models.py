@@ -9,12 +9,13 @@ from django.core.files.uploadedfile import UploadedFile
 from django.utils import timezone
 
 from .settings import (
-    EXPIRATION_DELTA,
-    UPLOAD_PATH,
-    STORAGE,
     ABSTRACT_MODEL,
+    CHECKSUM_TYPE,
     COMPLETE_EXT,
+    EXPIRATION_DELTA,
     INCOMPLETE_EXT,
+    STORAGE,
+    UPLOAD_PATH,
 )
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
@@ -61,15 +62,20 @@ class ChunkedUpload(models.Model):
 
     @property
     def md5(self, rehash=False):
-        if getattr(self, '_md5', None) is None or rehash is True:
-            md5 = hashlib.md5()
+        # method for backwards compatibility
+        return self.checksum(rehash)
+
+    @property
+    def checksum(self, rehash=False):
+        if getattr(self, '_checksum', None) is None or rehash is True:
+            h = hashlib.new(CHECKSUM_TYPE)
             self.close_file()
             self.file.open(mode='rb')
             for chunk in self.file.chunks():
-                md5.update(chunk)
-                self._md5 = md5.hexdigest()
+                h.update(chunk)
+                self._checksum = h.hexdigest()
             self.close_file()
-        return self._md5
+        return self._checksum
 
     def delete_file(self):
         if self.file:
@@ -110,7 +116,7 @@ class ChunkedUpload(models.Model):
             self.offset += chunk.size
         else:
             self.offset = self.file.size
-        self._md5 = None  # Clear cached md5
+        self._digest = None  # Clear cached md5
         if save:
             self.save()
         self.close_file()  # Flush

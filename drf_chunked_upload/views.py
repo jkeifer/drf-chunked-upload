@@ -8,7 +8,7 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.core.files.base import ContentFile
 
-from .settings import MAX_BYTES, USER_RESTRICTED
+from .settings import MAX_BYTES, USER_RESTRICTED, CHECKSUM_TYPE
 from .models import ChunkedUpload
 from .serializers import ChunkedUploadSerializer
 from .exceptions import ChunkedUploadError
@@ -98,9 +98,9 @@ class ChunkedUploadView(ListModelMixin, RetrieveModelMixin,
     define what to do when upload is complete.
     """
 
-    # I wouldn't recommend to turn off the md5 check, unless is really
+    # I wouldn't recommend to turn off the checksum check, unless is really
     # impacting your performance. Proceed at your own risk.
-    do_md5_check = True
+    do_checksum_check = True
 
     field_name = 'file'
     content_range_pattern = re.compile(
@@ -211,13 +211,13 @@ class ChunkedUploadView(ListModelMixin, RetrieveModelMixin,
             status=status.HTTP_200_OK
         )
 
-    def md5_check(self, chunked_upload, md5):
+    def checksum_check(self, chunked_upload, checksum):
         """
-        Verify if md5 checksum sent by client matches generated md5.
+        Verify if checksum sent by client matches generated checksum.
         """
-        if chunked_upload.md5 != md5:
+        if chunked_upload.checksum != checksum:
             raise ChunkedUploadError(status=status.HTTP_400_BAD_REQUEST,
-                                     detail='md5 checksum does not match')
+                                     detail='checksum does not match')
 
     def _post(self, request, pk=None, *args, **kwargs):
         chunked_upload = None
@@ -228,12 +228,13 @@ class ChunkedUploadView(ListModelMixin, RetrieveModelMixin,
                                              whole=True, **kwargs)
             upload_id = chunked_upload.id
 
-        md5 = request.data.get('md5')
+        checksum = request.data.get(CHECKSUM_TYPE)
 
         error_msg = None
-        if self.do_md5_check:
-            if not upload_id or not md5:
-                error_msg = "Both 'id' and 'md5' are required"
+        if self.do_checksum_check:
+            if not upload_id or not checksum:
+                error_msg = ("Both 'id' and '{}' are "
+                             "required").format(CHECKSUM_TYPE)
         elif not upload_id:
             error_msg = "'id' is required"
         if error_msg:
@@ -246,8 +247,8 @@ class ChunkedUploadView(ListModelMixin, RetrieveModelMixin,
 
         self.is_valid_chunked_upload(chunked_upload)
 
-        if self.do_md5_check:
-            self.md5_check(chunked_upload, md5)
+        if self.do_checksum_check:
+            self.checksum_check(chunked_upload, checksum)
 
         chunked_upload.completed()
 
