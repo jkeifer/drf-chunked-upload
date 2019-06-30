@@ -69,8 +69,8 @@ Typical usage
    and expiration (``expires``).
 
 5. Finally, when upload is completed, POST a request to the returned
-   ``url``. This request must include the ``md5`` checksum (hex) of the
-   entire file. Example:
+   ``url``. This request must include the checksum (hex) of the entire file.
+   Example:
 
 .. code:: python
 
@@ -84,8 +84,8 @@ Typical usage
    the data returned in the method ``get_response_data`` (if any).
 
 7. If you want to upload a file as a single chunk, this is also
-   possible! Simply make the first request a POST and include the md5
-   for the file. You don't need to include the ``Content-Range`` header
+   possible! Simply make the first request a POST and include the checksum
+   digest for the file. You don't need to include the ``Content-Range`` header
    if uploading a whole file.
 
 **Possible error responses:**
@@ -98,8 +98,8 @@ Typical usage
    400 (Bad request).
 -  Size of file exceeds limit (if specified). Server responds 400 (Bad
    request).
--  Offsets does not match. Server responds 400 (Bad request).
--  ``md5`` checksums does not match. Server responds 400 (Bad request).
+-  Offsets do not match. Server responds 400 (Bad request).
+-  Checksums do not match. Server responds 400 (Bad request).
 
 Settings
 --------
@@ -115,6 +115,13 @@ Add any of these variables into your project settings to override them.
 
 -  Path where uploaded files will be stored.
 -  Default: ``'chunked_uploads/%Y/%m/%d'``
+
+``DRF_CHUNKED_UPLOAD_CHECKSUM``
+
+- The type of checksum to use when verifying checksums. Options include anything
+  supported by Python's hashlib (md5, sha1, sha256, etc)
+- Default: ``'md5'``
+
 
 ``DRF_CHUNKED_UPLOAD_COMPLETE_EXT``
 
