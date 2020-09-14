@@ -170,6 +170,12 @@ class ChunkedUploadView(ListModelMixin, RetrieveModelMixin,
         chunk_size = end - start + 1
         max_bytes = self.get_max_bytes(request)
 
+        if end > total:
+            raise ChunkedUploadError(
+                status=status.HTTP_400_BAD_REQUEST,
+                detail='End of chunk exceeds reported total (%s bytes)' % total
+            )
+
         if max_bytes is not None and total > max_bytes:
             raise ChunkedUploadError(
                 status=status.HTTP_400_BAD_REQUEST,
