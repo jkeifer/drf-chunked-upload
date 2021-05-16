@@ -60,3 +60,4 @@ target/
 *.db
 *~
 .DS_Store
+.python-version
