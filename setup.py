@@ -28,8 +28,8 @@ setup(
     url='https://github.com/jkeifer/drf-chunked-upload',
     download_url=download_url % version,
     install_requires=[
-        'Django',
-        'djangorestframework',
+        'Django>=2.2',
+        'djangorestframework>=3.10',
     ],
     license='MIT-Zero'
 )
