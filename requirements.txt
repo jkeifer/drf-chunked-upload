@@ -1,2 +1,1 @@
-Django
-djangorestframework
+-r requirements/testing.txt
