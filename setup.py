@@ -29,7 +29,7 @@ setup(
     download_url=download_url % version,
     install_requires=[
         'Django>=2.2',
-        'djangorestframework>=3.10',
+        'djangorestframework>=3.11',
     ],
     license='MIT-Zero'
 )
