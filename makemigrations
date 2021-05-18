@@ -1,0 +1,2 @@
+#!/bin/bash
+DJANGO_SETTINGS_MODULE=migrations_settings django-admin makemigrations drf_chunked_upload
