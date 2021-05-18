@@ -2,9 +2,9 @@
 import os
 
 try:
-    from setuptools import setup
+    from setuptools import setup, find_packages
 except ImportError:
-    from distutils.core import setup
+    from distutils.core import setup, find_packages
 
 with open('README.rst', 'r') as r:
     readme = r.read()
@@ -17,7 +17,7 @@ version = os.environ.get('DCU_VERSION', '0.0.0')
 
 setup(
     name='drf-chunked-upload',
-    packages=['drf_chunked_upload'],
+    packages=find_packages(exclude=['tests*']),
     version=version,
     description=('Upload large files to Django REST Framework in multiple chunks,' +
                  ' with the ability to resume if the upload is interrupted.'),
