@@ -49,6 +49,7 @@ coverage.xml
 
 # Django stuff:
 *.log
+chunked_uploads/
 
 # Sphinx documentation
 docs/_build/

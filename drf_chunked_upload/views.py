@@ -27,6 +27,7 @@ class ChunkedUploadBaseView(GenericAPIView):
 
     # Has to be a ChunkedUpload subclass
     model = ChunkedUpload
+    user_field_name = 'user'  # the field name that point towards the AUTH_USER in ChunkedUpload class or its subclasses
     serializer_class = ChunkedUploadSerializer
 
     @property
@@ -38,10 +39,14 @@ class ChunkedUploadBaseView(GenericAPIView):
         Get (and filter) ChunkedUpload queryset.
         By default, user can only continue uploading his/her own uploads.
         """
-        queryset = self.model.objects.all()
-        if USER_RESTRICTED:
-            if is_authenticated(self.request.user):
-                queryset = queryset.filter(user=self.request.user)
+        if USER_RESTRICTED and hasattr(self.model, self.user_field_name):
+            if hasattr(self.request, 'user') and is_authenticated(self.request.user):
+                queryset = self.model.objects.filter(user=self.request.user)
+            else:
+                queryset = self.model.objects.none()
+        else:
+            queryset = self.model.objects.all()
+
         return queryset
 
     def get_response_data(self, chunked_upload, request):
@@ -198,14 +203,21 @@ class ChunkedUploadView(ListModelMixin, RetrieveModelMixin,
 
             chunked_upload.append_chunk(chunk, chunk_size=chunk_size)
         else:
-            user = request.user if is_authenticated(request.user) else None
+            kwargs = {'offset': chunk.size}
+
+            if hasattr(self.model, self.user_field_name):
+                if hasattr(request, 'user') and is_authenticated(request.user):
+                    kwargs['user'] = request.user
+                else:
+                    kwargs['user'] = None
+
             chunked_upload = self.serializer_class(data=request.data)
             if not chunked_upload.is_valid():
                 raise ChunkedUploadError(status=status.HTTP_400_BAD_REQUEST,
                                          detail=chunked_upload.errors)
             # chunked_upload is currently a serializer;
             # save returns model instance
-            chunked_upload = chunked_upload.save(user=user, offset=chunk.size)
+            chunked_upload = chunked_upload.save(**kwargs)
 
         return chunked_upload
 

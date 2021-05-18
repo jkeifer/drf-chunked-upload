@@ -26,7 +26,8 @@ def generate_filename(instance, filename):
     return time.strftime(filename)
 
 
-class ChunkedUpload(models.Model):
+class AbstractChunkedUpload(models.Model):
+    '''Inherit from this model if you are implementing your own.'''
     upload_dir = UPLOAD_PATH
     UPLOADING = 1
     COMPLETE = 2
@@ -40,10 +41,6 @@ class ChunkedUpload(models.Model):
                             storage=STORAGE,
                             null=True)
     filename = models.CharField(max_length=255)
-    user = models.ForeignKey(AUTH_USER_MODEL,
-                             related_name="%(class)s",
-                             editable=False,
-                             on_delete=models.CASCADE)
     offset = models.BigIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True,
                                       editable=False)
@@ -69,12 +66,12 @@ class ChunkedUpload(models.Model):
     def checksum(self, rehash=False):
         if getattr(self, '_checksum', None) is None or rehash is True:
             h = hashlib.new(CHECKSUM_TYPE)
-            self.close_file()
+            self.file.close()
             self.file.open(mode='rb')
             for chunk in self.file.chunks():
                 h.update(chunk)
                 self._checksum = h.hexdigest()
-            self.close_file()
+            self.file.close()
         return self._checksum
 
     def delete_file(self):
@@ -84,29 +81,18 @@ class ChunkedUpload(models.Model):
         self.file = None
 
     @transaction.atomic
-    def delete(self, delete_file=True, *args, **kwargs): 
+    def delete(self, delete_file=True, *args, **kwargs):
         super(ChunkedUpload, self).delete(*args, **kwargs)
         if delete_file:
             self.delete_file()
-            
+
 
     def __unicode__(self):
         return u'<%s - upload_id: %s - bytes: %s - status: %s>' % (
             self.filename, self.id, self.offset, self.status)
 
-    def close_file(self):
-        """
-        Bug in django 1.4: FieldFile `close` method is not reaching all the
-        way to the actual python file.
-        Fix: we had to loop all inner files and close them manually.
-        """
-        file_ = self.file
-        while file_ is not None:
-            file_.close()
-            file_ = getattr(file_, 'file', None)
-
     def append_chunk(self, chunk, chunk_size=None, save=True):
-        self.close_file()
+        self.file.close()
         self.file.open(mode='ab')  # mode = append+binary
         for subchunk in chunk.chunks():
             self.file.write(subchunk)
@@ -119,10 +105,10 @@ class ChunkedUpload(models.Model):
         self._digest = None  # Clear cached md5
         if save:
             self.save()
-        self.close_file()  # Flush
+        self.file.close()  # Flush
 
     def get_uploaded_file(self):
-        self.close_file()
+        self.file.close()
         self.file.open(mode='rb')  # mode = read+binary
         return UploadedFile(file=self.file, name=self.filename,
                             size=self.offset)
@@ -142,4 +128,16 @@ class ChunkedUpload(models.Model):
             )
 
     class Meta:
+        abstract = True
+
+
+class ChunkedUpload(AbstractChunkedUpload):
+    '''Concrete model if you are not implementing your own.'''
+    user = models.ForeignKey(AUTH_USER_MODEL,
+                             related_name="%(class)s",
+                             editable=False,
+                             on_delete=models.CASCADE)
+
+    class Meta:
         abstract = ABSTRACT_MODEL
+

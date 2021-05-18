@@ -5,6 +5,7 @@ def pytest_configure(config):
     from django.conf import settings
 
     settings.configure(
+        DEBUG=True,
         DEBUG_PROPAGATE_EXCEPTIONS=True,
         DATABASES={
             'default': {
@@ -30,6 +31,9 @@ def pytest_configure(config):
             'rest_framework',
             'drf_chunked_upload',
         ),
+
+        # our settings
+        DRF_CHUNKED_UPLOAD_ABSTRACT_MODEL=False,
     )
 
     django.setup()
