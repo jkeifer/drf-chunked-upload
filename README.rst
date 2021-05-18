@@ -40,33 +40,40 @@ Typical usage
 
 .. code:: python
 
-    {"my_file": file}
+    r = requests.put(upload_url, headers={
+                "Content-Range": "bytes {}-{}/{}".format(index, index + size - 1, total),
+            }, data={"filename": build_file}, files={'file': chunk_data})
 
 2. In return, the server will respond with the ``url`` of the upload,
-   the current ``offset``, and when the upload will expire
-   (``expires``). Example:
+   and the current ``offset``. Example:
 
 ::
 
     {
-        "url": "https://your-host/<path_to_view>/5230ec1f59d1485d9d7974b853802e31",
-        "offset": 10000,
-        "expires": "2013-07-18T17:56:22.186Z"
+        'id': 'f64ebd67-83a3-45b6-8acd-c749ea1ed4cd'
+        'url': 'https://your-host/<path_to_view>/f64ebd67-83a3-45b6-8acd-c749ea1ed4cd',
+        'file': 'https://your-host/<path_to_file>/f64ebd67-83a3-45b6-8acd-c749ea1ed4cd.part',
+        'filename': 'example.bin',
+        'offset': 10000,
+        `created_at`: '2021-05-18T17:12:50.318718Z',
+        'status': 1,
+        'completed_at': None,
+        'user': 1
     }
+
 
 3. Repeatedly PUT subsequent chunks to the ``url`` returned from the
    server. Example:
 
 .. code:: python
 
-    # PUT to https://your-host/<path_to_view>/5230ec1f59d1485d9d7974b853802e31
+    # PUT to https://your-host/<path_to_view>/f64ebd67-83a3-45b6-8acd-c749ea1ed4cd
+    upload_url = "https://your-host/<path_to_view>/f64ebd67-83a3-45b6-8acd-c749ea1ed4cd"
+    r = requests.put(upload_url, headers={
+                "Content-Range": "bytes {}-{}/{}".format(index, index + size - 1, total),
+            }, data={"filename": build_file}, files={'file': chunk_data})
 
-    {
-        "my_file": file
-    }
-
-4. Server will continue responding with the ``url``, current ``offset``
-   and expiration (``expires``).
+4. Server will continue responding with the ``url`` and current ``offset``.
 
 5. Finally, when upload is completed, POST a request to the returned
    ``url``. This request must include the checksum (hex) of the entire file.
@@ -75,10 +82,8 @@ Typical usage
 .. code:: python
 
     # POST to https://your-host/<path_to_view>/5230ec1f59d1485d9d7974b853802e31
-
-    {
-        "md5": "fc3ff98e8c6a0d3087d515c0473f8677"
-    }
+    upload_url = "https://your-host/<path_to_view>/f64ebd67-83a3-45b6-8acd-c749ea1ed4cd"
+    r = requests.put(upload_url, data={"md5": "fc3ff98e8c6a0d3087d515c0473f8677"})
 
 6. If everything is OK, server will response with status code 200 and
    the data returned in the method ``get_response_data`` (if any).
