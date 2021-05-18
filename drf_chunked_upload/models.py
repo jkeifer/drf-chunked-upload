@@ -82,7 +82,7 @@ class AbstractChunkedUpload(models.Model):
 
     @transaction.atomic
     def delete(self, delete_file=True, *args, **kwargs):
-        super(ChunkedUpload, self).delete(*args, **kwargs)
+        super().delete(*args, **kwargs)
         if delete_file:
             self.delete_file()
 
