@@ -1,12 +1,10 @@
 #!/usr/bin/env python
+import os
 
 try:
     from setuptools import setup
 except ImportError:
     from distutils.core import setup
-
-with open('VERSION.txt', 'r') as v:
-    version = v.read().strip()
 
 with open('README.rst', 'r') as r:
     readme = r.read()
@@ -15,6 +13,7 @@ download_url = (
     'https://github.com/jkeifer/drf-chunked-upload/tarball/%s'
 )
 
+version = os.environ.get('DCU_VERSION', '0.0.0')
 
 setup(
     name='drf-chunked-upload',
