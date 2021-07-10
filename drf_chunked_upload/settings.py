@@ -34,3 +34,6 @@ USER_RESTRICTED = getattr(settings, "DRF_CHUNKED_UPLOAD_USER_RESTRICED", True)
 DEFAULT_MAX_BYTES = None
 MAX_BYTES = getattr(settings, 'DRF_CHUNKED_UPLOAD_MAX_BYTES', DEFAULT_MAX_BYTES)
 
+# Reverse URL to redirect to after the inital chunk
+DEFAULT_REVERSE_URL_NAME = 'chunkedupload-detail'
+REVERSE_URL_NAME = getattr(settings, 'DRF_CHUNKED_UPLOAD_REVERSE_URL_NAME', DEFAULT_REVERSE_URL_NAME)

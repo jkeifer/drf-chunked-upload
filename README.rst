@@ -164,6 +164,11 @@ Add any of these variables into your project settings to override them.
    limit.
 -  Default: ``None``
 
+``DRF_CHUNKED_UPLOAD_REVERSE_URL_NAME``
+
+-  Reverse URL to redirect to after uploading the initial chunk
+-  Default: ``'chunkedupload-detail'``
+
 Support
 -------
 
