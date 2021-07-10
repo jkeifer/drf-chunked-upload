@@ -258,7 +258,10 @@ class ChunkedUploadView(ListModelMixin, RetrieveModelMixin,
 
         chunked_upload.completed()
 
-        self.on_completion(chunked_upload, request)
+        ret = self.on_completion(chunked_upload, request)
+        if ret:
+            return ret
+        
         return Response(
             self.response_serializer_class(chunked_upload,
                                            context={'request': request}).data,
