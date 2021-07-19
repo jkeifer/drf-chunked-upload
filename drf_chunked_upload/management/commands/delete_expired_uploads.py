@@ -133,6 +133,6 @@ class Command(BaseCommand):
         prompt = PROMPT_MSG.format(obj=chunked_upload) + u' (y/n): '
 
         while True not in ('y', 'n'):
-            answer = VALID_RESP.get(raw_input(prompt).lower(), None)
+            answer = VALID_RESP.get(input(prompt).lower(), None)
             if answer is not None:
                 return answer
