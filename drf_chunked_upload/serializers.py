@@ -8,7 +8,7 @@ class ChunkedUploadSerializer(serializers.ModelSerializer):
     url = serializers.SerializerMethodField()
 
     def get_url(self, obj):
-        return reverse(viewname,
+        return reverse(self.viewname,
                        kwargs={'pk': obj.id},
                        request=self.context['request'])
 
