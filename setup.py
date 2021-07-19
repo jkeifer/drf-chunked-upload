@@ -1,19 +1,14 @@
 #!/usr/bin/env python
 import os
+from setuptools import setup, find_packages
 
-try:
-    from setuptools import setup, find_packages
-except ImportError:
-    from distutils.core import setup, find_packages
+ROOT = os.path.abspath(os.path.dirname(__file__))
 
-with open('README.rst', 'r') as r:
-    readme = r.read()
-
-download_url = (
-    'https://github.com/jkeifer/drf-chunked-upload/tarball/%s'
-)
+with open(os.path.join(ROOT, 'README.rst'), encoding='utf-8') as f:
+    readme = f.read()
 
 version = os.environ.get('DCU_VERSION', '0.0.0')
+
 
 setup(
     name='drf-chunked-upload',
@@ -25,10 +20,9 @@ setup(
     author='Jarrett Keifer',
     author_email='jkeifer0@gmail.com',
     url='https://github.com/jkeifer/drf-chunked-upload',
-    download_url=download_url % version,
     install_requires=[
         'Django>=2.2',
         'djangorestframework>=3.11',
     ],
-    license='MIT-Zero'
+    license='MIT-Zero',
 )
