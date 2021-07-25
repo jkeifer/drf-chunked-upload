@@ -1,8 +1,8 @@
-import django
+from datetime import timedelta
+from django.conf import settings
 
 
-def pytest_configure(config):
-    from django.conf import settings
+def pytest_configure():
 
     settings.configure(
         DEBUG=True,
@@ -34,6 +34,5 @@ def pytest_configure(config):
 
         # our settings
         DRF_CHUNKED_UPLOAD_ABSTRACT_MODEL=False,
+        DRF_CHUNKED_UPLOAD_EXPIRATION_DELTA=timedelta(hours=1),
     )
-
-    django.setup()

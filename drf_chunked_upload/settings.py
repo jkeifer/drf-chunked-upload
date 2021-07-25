@@ -28,7 +28,7 @@ STORAGE = getattr(settings, 'DRF_CHUNKED_UPLOAD_STORAGE_CLASS', lambda: None)()
 ABSTRACT_MODEL = getattr(settings, 'DRF_CHUNKED_UPLOAD_ABSTRACT_MODEL', True)
 
 # Boolean that defines if users beside the creator can access an upload record
-USER_RESTRICTED = getattr(settings, "DRF_CHUNKED_UPLOAD_USER_RESTRICED", True)
+USER_RESTRICTED = getattr(settings, "DRF_CHUNKED_UPLOAD_USER_RESTRICTED", True)
 
 # Max amount of data (in bytes) that can be uploaded. `None` means no limit
 DEFAULT_MAX_BYTES = None
