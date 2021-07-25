@@ -6,10 +6,10 @@ from six import iteritems
 import django.apps
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
-from drf_chunked_upload.settings import EXPIRATION_DELTA
-from drf_chunked_upload.models import ChunkedUpload
+from drf_chunked_upload import settings as _settings
+from drf_chunked_upload.models import AbstractChunkedUpload
 
 
 PROMPT_MSG = _(u'Do you want to delete {obj}?')
@@ -24,17 +24,18 @@ VALID_RESP = {
 
 class Command(BaseCommand):
 
-    # Has to be a ChunkedUpload subclass
-    base_model = ChunkedUpload
+    # Has to be an AbstractChunkedUpload subclass
+    base_model = AbstractChunkedUpload
 
-    help = 'Deletes chunked uploads that have already expired.'
+    help = 'Deletes incomplete chunked uploads that have expired.'
 
     def add_arguments(self, parser):
         parser.add_argument(
             'models',
             metavar='app.model',
             nargs='*',
-            help='Any app.model classes you want to clean up. Default is all ChunkedUpload subclasses within a project.',
+            help='Any app.model classes you want to clean up. '
+                 'Default is all AbstractChunkedUpload subclasses within a project.',
         )
         parser.add_argument(
             '-i',
@@ -72,7 +73,7 @@ class Command(BaseCommand):
         else:
             if issubclass(model_cls, self.base_model):
                 return model_cls
-            print("WARNING: Model {} is not a subclass of ChunkedUpload and will be skipped.".format(model))
+            print("WARNING: Model {} is not a subclass of AbstractChunkedUpload and will be skipped.".format(model))
             return None
 
     def get_models(self, filter_models=None):
@@ -87,7 +88,7 @@ class Command(BaseCommand):
                     upload_models.append(model)
         else:
             # no models were specified and we want
-            # to find all ChunkedUpload classes
+            # to find all AbstractChunkedUpload classes
             upload_models = \
                 [m for m in django.apps.apps.get_models() if issubclass(m, self.base_model)]
 
@@ -102,7 +103,8 @@ class Command(BaseCommand):
         count = Counter({state[0]: 0 for state in model.STATUS_CHOICES})
 
         chunked_uploads = model.objects.filter(
-            created_at__lt=(timezone.now() - EXPIRATION_DELTA)
+            created_at__lt=(timezone.now() - _settings.EXPIRATION_DELTA),
+            status=AbstractChunkedUpload.UPLOADING,
         )
 
         if delete_record == False:
@@ -130,7 +132,7 @@ class Command(BaseCommand):
             )
 
     def get_confirmation(self, chunked_upload):
-        prompt = PROMPT_MSG.format(obj=chunked_upload) + u' (y/n): '
+        prompt = PROMPT_MSG.format(obj=chunked_upload) + ' (y/n): '
 
         while True not in ('y', 'n'):
             answer = VALID_RESP.get(input(prompt).lower(), None)
