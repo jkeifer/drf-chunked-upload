@@ -240,10 +240,10 @@ def test_resume_completed(view, user1, user1_completed_upload):
 @pytest.mark.django_db
 def test_bad_content_ranges(view, user1):
     bad_content_ranges = [
-        'nonsense',
-        '0-100000/5',
-        '0-50/999999999999999999999',
-        '0-1/100000',
+        'bytes nonsense',
+        'bytes 0-100000/5',
+        'bytes 0-50/999999999999999999999',
+        'bytes 0-1/100000',
     ]
     for cr in bad_content_ranges:
         chunks = Chunks()
