@@ -8,16 +8,10 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.core.files.base import ContentFile
 
-from .settings import MAX_BYTES, USER_RESTRICTED, CHECKSUM_TYPE
-from .models import ChunkedUpload
-from .serializers import ChunkedUploadSerializer
-from .exceptions import ChunkedUploadError
-
-
-def is_authenticated(user):
-    if callable(user.is_authenticated):
-        return user.is_authenticated()
-    return user.is_authenticated
+from drf_chunked_upload import settings as _settings
+from drf_chunked_upload.models import ChunkedUpload
+from drf_chunked_upload.serializers import ChunkedUploadSerializer
+from drf_chunked_upload.exceptions import ChunkedUploadError
 
 
 class ChunkedUploadBaseView(GenericAPIView):
@@ -39,8 +33,8 @@ class ChunkedUploadBaseView(GenericAPIView):
         Get (and filter) ChunkedUpload queryset.
         By default, user can only continue uploading his/her own uploads.
         """
-        if USER_RESTRICTED and hasattr(self.model, self.user_field_name):
-            if hasattr(self.request, 'user') and is_authenticated(self.request.user):
+        if _settings.USER_RESTRICTED and hasattr(self.model, self.user_field_name):
+            if hasattr(self.request, 'user') and self.request.user.is_authenticated:
                 queryset = self.model.objects.filter(user=self.request.user)
             else:
                 queryset = self.model.objects.none()
@@ -48,13 +42,6 @@ class ChunkedUploadBaseView(GenericAPIView):
             queryset = self.model.objects.all()
 
         return queryset
-
-    def get_response_data(self, chunked_upload, request):
-        """
-        Data for the response. Should return a dictionary-like object.
-        Called *only* if POST is successful.
-        """
-        return {}
 
     def _post(self, request, pk=None, *args, **kwargs):
         raise NotImplementedError
@@ -111,12 +98,20 @@ class ChunkedUploadView(ListModelMixin, RetrieveModelMixin,
     content_range_pattern = re.compile(
         r'^bytes (?P<start>\d+)-(?P<end>\d+)/(?P<total>\d+)$'
     )
-    max_bytes = MAX_BYTES  # Max amount of data that can be uploaded
+    max_bytes = _settings.MAX_BYTES  # Max amount of data that can be uploaded
 
-    def on_completion(self, chunked_upload, request):
+    def on_completion(self, chunked_upload, request) -> Response:
         """
-        Placeholder method to define what to do when upload is complete.
+        Validation or operations to run when upload is complete.
+        Returns an HTTP response.
         """
+        return Response(
+            self.response_serializer_class(
+                chunked_upload,
+                context={'request': request}
+            ).data,
+            status=status.HTTP_200_OK,
+        )
 
     def get_max_bytes(self, request):
         """
@@ -127,16 +122,6 @@ class ChunkedUploadView(ListModelMixin, RetrieveModelMixin,
         """
 
         return self.max_bytes
-
-    def create_chunked_upload(self, save=False, **attrs):
-        """
-        Creates new chunked upload instance. Called if no 'id' is
-        found in the POST data.
-        """
-        chunked_upload = self.model(**attrs)
-        # file starts empty
-        chunked_upload.file.save(name='', content=ContentFile(''), save=save)
-        return chunked_upload
 
     def is_valid_chunked_upload(self, chunked_upload):
         """
@@ -188,8 +173,13 @@ class ChunkedUploadView(ListModelMixin, RetrieveModelMixin,
             )
 
         if chunk.size != chunk_size:
-            raise ChunkedUploadError(status=status.HTTP_400_BAD_REQUEST,
-                                     detail="File size doesn't match headers: file size is {} but {} reported".format(chunk.size, chunk_size))
+            raise ChunkedUploadError(
+                status=status.HTTP_400_BAD_REQUEST,
+                detail="File size doesn't match headers: file size is {} but {} reported".format(
+                    chunk.size,
+                    chunk_size,
+                ),
+            )
 
         if pk:
             upload_id = pk
@@ -206,7 +196,7 @@ class ChunkedUploadView(ListModelMixin, RetrieveModelMixin,
             kwargs = {'offset': chunk.size}
 
             if hasattr(self.model, self.user_field_name):
-                if hasattr(request, 'user') and is_authenticated(request.user):
+                if hasattr(request, 'user') and request.user.is_authenticated:
                     kwargs['user'] = request.user
                 else:
                     kwargs['user'] = None
@@ -237,7 +227,7 @@ class ChunkedUploadView(ListModelMixin, RetrieveModelMixin,
             raise ChunkedUploadError(status=status.HTTP_400_BAD_REQUEST,
                                      detail='checksum does not match')
 
-    def _post(self, request, pk=None, *args, **kwargs):
+    def _post(self, request, pk=None, *args, **kwargs) -> Response:
         chunked_upload = None
         if pk:
             upload_id = pk
@@ -246,13 +236,13 @@ class ChunkedUploadView(ListModelMixin, RetrieveModelMixin,
                                              whole=True, **kwargs)
             upload_id = chunked_upload.id
 
-        checksum = request.data.get(CHECKSUM_TYPE)
+        checksum = request.data.get(_settings.CHECKSUM_TYPE)
 
         error_msg = None
         if self.do_checksum_check:
             if not upload_id or not checksum:
                 error_msg = ("Both 'id' and '{}' are "
-                             "required").format(CHECKSUM_TYPE)
+                             "required").format(_settings.CHECKSUM_TYPE)
         elif not upload_id:
             error_msg = "'id' is required"
         if error_msg:
@@ -270,12 +260,7 @@ class ChunkedUploadView(ListModelMixin, RetrieveModelMixin,
 
         chunked_upload.completed()
 
-        self.on_completion(chunked_upload, request)
-        return Response(
-            self.response_serializer_class(chunked_upload,
-                                           context={'request': request}).data,
-            status=status.HTTP_200_OK
-        )
+        return self.on_completion(chunked_upload, request)
 
     def _get(self, request, pk=None, *args, **kwargs):
         if pk:

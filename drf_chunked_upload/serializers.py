@@ -1,6 +1,7 @@
 from rest_framework import serializers
-from .models import ChunkedUpload
 from rest_framework.reverse import reverse
+
+from drf_chunked_upload.models import ChunkedUpload
 
 
 class ChunkedUploadSerializer(serializers.ModelSerializer):

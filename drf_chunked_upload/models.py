@@ -8,27 +8,20 @@ from django.conf import settings
 from django.core.files.uploadedfile import UploadedFile
 from django.utils import timezone
 
-from .settings import (
-    ABSTRACT_MODEL,
-    CHECKSUM_TYPE,
-    COMPLETE_EXT,
-    EXPIRATION_DELTA,
-    INCOMPLETE_EXT,
-    STORAGE,
-    UPLOAD_PATH,
-)
+from drf_chunked_upload import settings as _settings
+
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
 
 def generate_filename(instance, filename):
-    filename = os.path.join(instance.upload_dir, str(instance.id) + INCOMPLETE_EXT)
+    filename = os.path.join(instance.upload_dir, str(instance.id) + _settings.INCOMPLETE_EXT)
     return time.strftime(filename)
 
 
 class AbstractChunkedUpload(models.Model):
     '''Inherit from this model if you are implementing your own.'''
-    upload_dir = UPLOAD_PATH
+    upload_dir = _settings.UPLOAD_PATH
     UPLOADING = 1
     COMPLETE = 2
     STATUS_CHOICES = (
@@ -38,7 +31,7 @@ class AbstractChunkedUpload(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     file = models.FileField(max_length=255,
                             upload_to=generate_filename,
-                            storage=STORAGE,
+                            storage=_settings.STORAGE,
                             null=True)
     filename = models.CharField(max_length=255)
     offset = models.BigIntegerField(default=0)
@@ -51,7 +44,7 @@ class AbstractChunkedUpload(models.Model):
 
     @property
     def expires_at(self):
-        return self.created_at + EXPIRATION_DELTA
+        return self.created_at + _settings.EXPIRATION_DELTA
 
     @property
     def expired(self):
@@ -65,7 +58,7 @@ class AbstractChunkedUpload(models.Model):
     @property
     def checksum(self, rehash=False):
         if getattr(self, '_checksum', None) is None or rehash is True:
-            h = hashlib.new(CHECKSUM_TYPE)
+            h = hashlib.new(_settings.CHECKSUM_TYPE)
             self.file.close()
             self.file.open(mode='rb')
             for chunk in self.file.chunks():
@@ -114,14 +107,14 @@ class AbstractChunkedUpload(models.Model):
                             size=self.offset)
 
     @transaction.atomic
-    def completed(self, completed_at=timezone.now(), ext=COMPLETE_EXT):
-        if ext != INCOMPLETE_EXT:
+    def completed(self, completed_at=timezone.now(), ext=_settings.COMPLETE_EXT):
+        if ext != _settings.INCOMPLETE_EXT:
             original_path = self.file.path
             self.file.name = os.path.splitext(self.file.name)[0] + ext
         self.status = self.COMPLETE
         self.completed_at = completed_at
         self.save()
-        if ext != INCOMPLETE_EXT:
+        if ext != _settings.INCOMPLETE_EXT:
             os.rename(
                 original_path,
                 os.path.splitext(self.file.path)[0] + ext,
@@ -139,5 +132,5 @@ class ChunkedUpload(AbstractChunkedUpload):
                              on_delete=models.CASCADE)
 
     class Meta:
-        abstract = ABSTRACT_MODEL
+        abstract = _settings.ABSTRACT_MODEL
 
