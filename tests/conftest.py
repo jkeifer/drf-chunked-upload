@@ -34,5 +34,5 @@ def pytest_configure():
 
         # our settings
         DRF_CHUNKED_UPLOAD_ABSTRACT_MODEL=False,
-        DRF_CHUNKED_UPLOAD_EXPIRATION_DELTA=timedelta(hours=1),
+        DRF_CHUNKED_UPLOAD_MAX_BYTES=1000000,
     )

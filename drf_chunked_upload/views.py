@@ -6,7 +6,6 @@ from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework import status
 
 from django.shortcuts import get_object_or_404
-from django.core.files.base import ContentFile
 
 from drf_chunked_upload import settings as _settings
 from drf_chunked_upload.models import ChunkedUpload
@@ -90,8 +89,9 @@ class ChunkedUploadView(ListModelMixin, RetrieveModelMixin,
     define what to do when upload is complete.
     """
 
-    # I wouldn't recommend to turn off the checksum check, unless is really
-    # impacting your performance. Proceed at your own risk.
+    # I wouldn't recommend turning off the checksum check,
+    # unless it is signifcantly impacting performance.
+    # Proceed at your own risk.
     do_checksum_check = True
 
     field_name = 'file'
@@ -198,13 +198,19 @@ class ChunkedUploadView(ListModelMixin, RetrieveModelMixin,
             if hasattr(self.model, self.user_field_name):
                 if hasattr(request, 'user') and request.user.is_authenticated:
                     kwargs['user'] = request.user
-                else:
+                elif self.model._meta.get_field(self.user_field_name).null:
                     kwargs['user'] = None
+                else:
+                    raise ChunkedUploadError(
+                        status=status.HTTP_400_BAD_REQUEST,
+                        detail="Upload requires user authentication but user cannot be determined",
+                    )
 
             chunked_upload = self.serializer_class(data=request.data)
             if not chunked_upload.is_valid():
                 raise ChunkedUploadError(status=status.HTTP_400_BAD_REQUEST,
                                          detail=chunked_upload.errors)
+
             # chunked_upload is currently a serializer;
             # save returns model instance
             chunked_upload = chunked_upload.save(**kwargs)
@@ -238,20 +244,14 @@ class ChunkedUploadView(ListModelMixin, RetrieveModelMixin,
 
         checksum = request.data.get(_settings.CHECKSUM_TYPE)
 
-        error_msg = None
-        if self.do_checksum_check:
-            if not upload_id or not checksum:
-                error_msg = ("Both 'id' and '{}' are "
-                             "required").format(_settings.CHECKSUM_TYPE)
-        elif not upload_id:
-            error_msg = "'id' is required"
-        if error_msg:
-            raise ChunkedUploadError(status=status.HTTP_400_BAD_REQUEST,
-                                     detail=error_msg)
+        if self.do_checksum_check and not checksum:
+            raise ChunkedUploadError(
+                status=status.HTTP_400_BAD_REQUEST,
+                detail="Checksum of type '{}' is required".format(_settings.CHECKSUM_TYPE),
+            )
 
         if not chunked_upload:
-            chunked_upload = get_object_or_404(self.get_queryset(),
-                                               pk=upload_id)
+            chunked_upload = get_object_or_404(self.get_queryset(), pk=upload_id)
 
         self.is_valid_chunked_upload(chunked_upload)
 

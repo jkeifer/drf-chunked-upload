@@ -15,32 +15,44 @@ AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
 
 def generate_filename(instance, filename):
-    filename = os.path.join(instance.upload_dir, str(instance.id) + _settings.INCOMPLETE_EXT)
+    upload_dir = getattr(instance, 'upload_dir', _settings.UPLOAD_PATH)
+    filename = os.path.join(upload_dir, str(instance.id) + _settings.INCOMPLETE_EXT)
     return time.strftime(filename)
 
 
 class AbstractChunkedUpload(models.Model):
     '''Inherit from this model if you are implementing your own.'''
-    upload_dir = _settings.UPLOAD_PATH
     UPLOADING = 1
     COMPLETE = 2
     STATUS_CHOICES = (
         (UPLOADING, 'Incomplete'),
         (COMPLETE, 'Complete'),
     )
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    file = models.FileField(max_length=255,
-                            upload_to=generate_filename,
-                            storage=_settings.STORAGE,
-                            null=True)
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
+    file = models.FileField(
+        max_length=255,
+        upload_to=generate_filename,
+        storage=_settings.STORAGE,
+        null=True,
+    )
     filename = models.CharField(max_length=255)
     offset = models.BigIntegerField(default=0)
-    created_at = models.DateTimeField(auto_now_add=True,
-                                      editable=False)
-    status = models.PositiveSmallIntegerField(choices=STATUS_CHOICES,
-                                              default=UPLOADING)
-    completed_at = models.DateTimeField(null=True,
-                                        blank=True)
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        editable=False,
+    )
+    status = models.PositiveSmallIntegerField(
+        choices=STATUS_CHOICES,
+        default=UPLOADING,
+    )
+    completed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
 
     @property
     def expires_at(self):
@@ -48,7 +60,7 @@ class AbstractChunkedUpload(models.Model):
 
     @property
     def expired(self):
-        return self.expires_at <= timezone.now()
+        return self.status == self.UPLOADING and self.expires_at <= timezone.now()
 
     @property
     def md5(self, rehash=False):
@@ -79,14 +91,17 @@ class AbstractChunkedUpload(models.Model):
         if delete_file:
             self.delete_file()
 
-
-    def __unicode__(self):
-        return u'<%s - upload_id: %s - bytes: %s - status: %s>' % (
-            self.filename, self.id, self.offset, self.status)
+    def __repr__(self):
+        return '<{} - upload_id: {} - bytes: {} - status: {}>'.format(
+            self.filename,
+            self.id,
+            self.offset,
+            self.status,
+        )
 
     def append_chunk(self, chunk, chunk_size=None, save=True):
         self.file.close()
-        self.file.open(mode='ab')  # mode = append+binary
+        self.file.open(mode='ab')
         for subchunk in chunk.chunks():
             self.file.write(subchunk)
         if chunk_size is not None:
@@ -95,16 +110,17 @@ class AbstractChunkedUpload(models.Model):
             self.offset += chunk.size
         else:
             self.offset = self.file.size
-        self._digest = None  # Clear cached md5
+        # clear any cached checksum
+        self._checksum = None
         if save:
             self.save()
-        self.file.close()  # Flush
+        self.file.close()
 
     def get_uploaded_file(self):
         self.file.close()
-        self.file.open(mode='rb')  # mode = read+binary
+        self.file.open(mode='rb')
         return UploadedFile(file=self.file, name=self.filename,
-                            size=self.offset)
+                            size=self.file.size)
 
     @transaction.atomic
     def completed(self, completed_at=timezone.now(), ext=_settings.COMPLETE_EXT):
@@ -133,4 +149,3 @@ class ChunkedUpload(AbstractChunkedUpload):
 
     class Meta:
         abstract = _settings.ABSTRACT_MODEL
-
