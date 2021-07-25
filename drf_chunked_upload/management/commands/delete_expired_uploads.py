@@ -1,7 +1,4 @@
-from __future__ import print_function
-
 from collections import Counter
-from six import iteritems
 
 import django.apps
 from django.core.management.base import BaseCommand
@@ -122,7 +119,7 @@ class Command(BaseCommand):
                 chunked_upload.delete_file()
                 chunked_upload.save()
 
-        for state, number in iteritems(count):
+        for state, number in count.items():
             print(
                 '{} {} upload{}s were deleted.'.format(
                     number,
