@@ -1,9 +1,9 @@
 from django.contrib import admin
 
-from .models import ChunkedUpload
-from .settings import ABSTRACT_MODEL
+from drf_chunked_upload.models import ChunkedUpload
+from drf_chunked_upload import settings as _settings
 
-if not ABSTRACT_MODEL:  # If the model exists
+if not _settings.ABSTRACT_MODEL:  # If the model exists
 
     class ChunkedUploadAdmin(admin.ModelAdmin):
         list_display = ('id', 'filename', 'user', 'status',
