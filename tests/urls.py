@@ -1,4 +1,7 @@
-from django.conf.urls import re_path
+try:
+    from django.conf.urls import re_path
+except ImportError:
+    from django.urls import re_path
 
 from drf_chunked_upload.views import ChunkedUploadView
 
