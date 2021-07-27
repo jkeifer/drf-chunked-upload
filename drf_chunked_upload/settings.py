@@ -38,4 +38,4 @@ MAX_BYTES = getattr(
 
 # Boolean indiacating whether only authenticated users should be able to use the upload functionality.
 RESTRICT_TO_AUTH_USERS = getattr(
-    settings, 'DRF_CHUNKED_UPLOAD_RESTRICT_TO_AUTH_USERS', DEFAULT_MAX_BYTES)
+    settings, 'DRF_CHUNKED_UPLOAD_RESTRICT_TO_AUTH_USERS', False)
