@@ -4,6 +4,7 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 
 from django.shortcuts import get_object_or_404
 
@@ -20,8 +21,12 @@ class ChunkedUploadBaseView(GenericAPIView):
 
     # Has to be a ChunkedUpload subclass
     model = ChunkedUpload
-    user_field_name = 'user'  # the field name that point towards the AUTH_USER in ChunkedUpload class or its subclasses
+    # the field name that point towards the AUTH_USER in ChunkedUpload class or its subclasses
+    user_field_name = 'user'
     serializer_class = ChunkedUploadSerializer
+
+    if (_settings.RESTRICT_TO_AUTH_USERS):
+        permission_classes = [IsAuthenticated]
 
     @property
     def response_serializer_class(self):
@@ -92,6 +97,10 @@ class ChunkedUploadView(ListModelMixin, RetrieveModelMixin,
     # I wouldn't recommend turning off the checksum check,
     # unless it is signifcantly impacting performance.
     # Proceed at your own risk.
+
+    if (_settings.RESTRICT_TO_AUTH_USERS):
+        permission_classes = [IsAuthenticated]
+
     do_checksum_check = True
 
     field_name = 'file'
@@ -247,11 +256,13 @@ class ChunkedUploadView(ListModelMixin, RetrieveModelMixin,
         if self.do_checksum_check and not checksum:
             raise ChunkedUploadError(
                 status=status.HTTP_400_BAD_REQUEST,
-                detail="Checksum of type '{}' is required".format(_settings.CHECKSUM_TYPE),
+                detail="Checksum of type '{}' is required".format(
+                    _settings.CHECKSUM_TYPE),
             )
 
         if not chunked_upload:
-            chunked_upload = get_object_or_404(self.get_queryset(), pk=upload_id)
+            chunked_upload = get_object_or_404(
+                self.get_queryset(), pk=upload_id)
 
         self.is_valid_chunked_upload(chunked_upload)
 

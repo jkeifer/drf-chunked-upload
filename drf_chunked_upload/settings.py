@@ -19,7 +19,8 @@ CHECKSUM_TYPE = getattr(settings, 'DRF_CHUNKED_UPLOAD_CHECKSUM',
 
 # File extensions for upload files
 COMPLETE_EXT = getattr(settings, 'DRF_CHUNKED_UPLOAD_COMPLETE_EXT', '.done')
-INCOMPLETE_EXT = getattr(settings, 'DRF_CHUNKED_UPLOAD_INCOMPLETE_EXT', '.part')
+INCOMPLETE_EXT = getattr(
+    settings, 'DRF_CHUNKED_UPLOAD_INCOMPLETE_EXT', '.part')
 
 # Storage system
 STORAGE = getattr(settings, 'DRF_CHUNKED_UPLOAD_STORAGE_CLASS', lambda: None)()
@@ -32,5 +33,9 @@ USER_RESTRICTED = getattr(settings, "DRF_CHUNKED_UPLOAD_USER_RESTRICTED", True)
 
 # Max amount of data (in bytes) that can be uploaded. `None` means no limit
 DEFAULT_MAX_BYTES = None
-MAX_BYTES = getattr(settings, 'DRF_CHUNKED_UPLOAD_MAX_BYTES', DEFAULT_MAX_BYTES)
+MAX_BYTES = getattr(
+    settings, 'DRF_CHUNKED_UPLOAD_MAX_BYTES', DEFAULT_MAX_BYTES)
 
+# Boolean indiacating whether only authenticated users should be able to use the upload functionality.
+RESTRICT_TO_AUTH_USERS = getattr(
+    settings, 'DRF_CHUNKED_UPLOAD_RESTRICT_TO_AUTH_USERS', DEFAULT_MAX_BYTES)
