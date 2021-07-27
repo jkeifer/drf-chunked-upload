@@ -4,7 +4,6 @@
 [![coverage-status-image]][codecov]
 [![pypi-version]][pypi]
 
-
 This simple django app enables users to upload large files to Django
 Rest Framework in multiple chunks, with the ability to resume if the
 upload is interrupted.
@@ -14,7 +13,6 @@ This app is based to a large degree on the work of
 [django-chunked-upload app][dcu].
 
 License: [MIT-Zero][lic].
-
 
 ## Installation
 
@@ -33,7 +31,6 @@ INSTALLED_APPS = (
 )
 ```
 
-
 ## Typical usage
 
 1.  An initial PUT request is sent to the url linked to
@@ -41,7 +38,7 @@ INSTALLED_APPS = (
     file. The name of the chunk file can be overriden in the view (class
     attribute `field_name`). Example:
 
-``` python
+```python
 r = requests.put(
     upload_url,
     headers={
@@ -72,7 +69,7 @@ r = requests.put(
 3.  Repeatedly PUT subsequent chunks to the `url` returned from the
     server. Example:
 
-``` python
+```python
 # PUT to https://your-host/<path_to_view>/f64ebd67-83a3-45b6-8acd-c749ea1ed4cd
 upload_url = "https://your-host/<path_to_view>/f64ebd67-83a3-45b6-8acd-c749ea1ed4cd"
 r = requests.put(
@@ -90,7 +87,7 @@ r = requests.put(
     `url`. This request must include the checksum (hex) of the entire
     file. Example:
 
-``` python
+```python
 # POST to https://your-host/<path_to_view>/5230ec1f59d1485d9d7974b853802e31
 upload_url = "https://your-host/<path_to_view>/f64ebd67-83a3-45b6-8acd-c749ea1ed4cd"
 r = requests.put(upload_url, data={"md5": "fc3ff98e8c6a0d3087d515c0473f8677"})
@@ -105,17 +102,16 @@ r = requests.put(upload_url, data={"md5": "fc3ff98e8c6a0d3087d515c0473f8677"})
 
 **Possible error responses:**
 
--   Upload has expired. Server responds 410 (Gone).
--   `id` does not match any upload. Server responds 404 (Not found).
--   No chunk file is found in the indicated key. Server responds 400
-    (Bad request).
--   Request does not contain `Content-Range` header. Server responds 400
-    (Bad request).
--   Size of file exceeds limit (if specified). Server responds 400 (Bad
-    request).
--   Offsets do not match. Server responds 400 (Bad request).
--   Checksums do not match. Server responds 400 (Bad request).
-
+- Upload has expired. Server responds 410 (Gone).
+- `id` does not match any upload. Server responds 404 (Not found).
+- No chunk file is found in the indicated key. Server responds 400
+  (Bad request).
+- Request does not contain `Content-Range` header. Server responds 400
+  (Bad request).
+- Size of file exceeds limit (if specified). Server responds 400 (Bad
+  request).
+- Offsets do not match. Server responds 400 (Bad request).
+- Checksums do not match. Server responds 400 (Bad request).
 
 ## Settings
 
@@ -123,71 +119,66 @@ Add any of these variables into your project settings to override them.
 
 `DRF_CHUNKED_UPLOAD_EXPIRATION_DELTA`
 
--   How long after creation the upload will expire.
--   Default: `datetime.timedelta(days=1)`
-
+- How long after creation the upload will expire.
+- Default: `datetime.timedelta(days=1)`
 
 `DRF_CHUNKED_UPLOAD_PATH`
 
--   Path where uploaded files will be stored.
--   Default: `'chunked_uploads/%Y/%m/%d'`
-
+- Path where uploaded files will be stored.
+- Default: `'chunked_uploads/%Y/%m/%d'`
 
 `DRF_CHUNKED_UPLOAD_CHECKSUM`
 
--   The type of checksum to use when verifying checksums. Options
-    include anything supported by Python\'s hashlib (md5, sha1, sha256,
-    etc)
--   Default: `'md5'`
-
+- The type of checksum to use when verifying checksums. Options
+  include anything supported by Python\'s hashlib (md5, sha1, sha256,
+  etc)
+- Default: `'md5'`
 
 `DRF_CHUNKED_UPLOAD_COMPLETE_EXT`
 
--   Extension to use for completed uploads. Uploads will be renamed
-    using this extension on completion, unless this extension matched
-    DRF_CHUNKED_UPLOAD_INCOMPLETE_EXT.
--   Default: `'.done'`
-
+- Extension to use for completed uploads. Uploads will be renamed
+  using this extension on completion, unless this extension matched
+  DRF_CHUNKED_UPLOAD_INCOMPLETE_EXT.
+- Default: `'.done'`
 
 `DRF_CHUNKED_UPLOAD_INCOMPLETE_EXT`
 
--   Extension for in progress upload files.
--   Default: `'.part'`
-
+- Extension for in progress upload files.
+- Default: `'.part'`
 
 `DRF_CHUNKED_UPLOAD_STORAGE_CLASS`
 
--   Storage system (should be a class)
--   Default: `None` (use default storage system)
-
+- Storage system (should be a class)
+- Default: `None` (use default storage system)
 
 `DRF_CHUNKED_UPLOAD_USER_RESTRICED`
 
--   Boolean that determines whether only the user who created an upload
-    can view/continue an upload.
--   Default: `True`
+- Boolean that determines whether only the user who created an upload
+  can view/continue an upload.
+- Default: `True`
 
+`DRF_CHUNKED_UPLOAD_RESTRICT_TO_AUTH_USERS`
+
+- Boolean that determines whether only authenticated users can upload.
+- Default: `None`
 
 `DRF_CHUNKED_UPLOAD_ABSTRACT_MODEL`
 
--   Boolean that defines if the `ChunkedUpload` model will be abstract
-    or not ([what does abstract model mean?][abstract-model]).
--   Default: `True`
-
+- Boolean that defines if the `ChunkedUpload` model will be abstract
+  or not ([what does abstract model mean?][abstract-model]).
+- Default: `True`
 
 `DRF_CHUNKED_UPLOAD_MAX_BYTES`
 
--   Max amount of data (in bytes) that can be uploaded. `None` means no
-    limit.
--   Default: `None`
-
+- Max amount of data (in bytes) that can be uploaded. `None` means no
+  limit.
+- Default: `None`
 
 ## Support
 
 If you find any bug or you want to propose a new feature, please use the
 [issues tracker][issues].
 Pull requests are also accepted.
-
 
 [build-status-image]: https://github.com/jkeifer/drf-chunked-upload/actions/workflows/main.yml/badge.svg
 [build-status]: https://github.com/jkeifer/drf-chunked-upload/actions/workflows/main.yml
