@@ -91,9 +91,9 @@ r = requests.put(
     file. Example:
 
 ``` python
-# POST to https://your-host/<path_to_view>/5230ec1f59d1485d9d7974b853802e31
+# POST to https://your-host/<path_to_view>/f64ebd67-83a3-45b6-8acd-c749ea1ed4cd
 upload_url = "https://your-host/<path_to_view>/f64ebd67-83a3-45b6-8acd-c749ea1ed4cd"
-r = requests.put(upload_url, data={"md5": "fc3ff98e8c6a0d3087d515c0473f8677"})
+r = requests.post(upload_url, data={"md5": "fc3ff98e8c6a0d3087d515c0473f8677"})
 ```
 
 6.  If everything is OK, server will response with status code 200 and
