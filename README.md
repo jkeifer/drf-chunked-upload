@@ -199,4 +199,4 @@ Pull requests are also accepted.
 [dcu]: https://github.com/juliomalegria/django-chunked-upload
 [issues]: https://github.com/jkeifer/drf-chunked-upload/issues
 [lic]: https://romanrm.net/mit-zero
-[abstract-model]: https://docs.djangoproject.com/en/1.4/ref/models/options/#abstract
+[abstract-model]: https://docs.djangoproject.com/en/3.2/topics/db/models/#abstract-base-classes
