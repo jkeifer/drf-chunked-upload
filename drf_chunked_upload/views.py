@@ -197,9 +197,9 @@ class ChunkedUploadView(ListModelMixin, RetrieveModelMixin,
 
             if hasattr(self.model, self.user_field_name):
                 if hasattr(request, 'user') and request.user.is_authenticated:
-                    kwargs['user'] = request.user
+                    kwargs[self.user_field_name] = request.user
                 elif self.model._meta.get_field(self.user_field_name).null:
-                    kwargs['user'] = None
+                    kwargs[self.user_field_name] = None
                 else:
                     raise ChunkedUploadError(
                         status=status.HTTP_400_BAD_REQUEST,
