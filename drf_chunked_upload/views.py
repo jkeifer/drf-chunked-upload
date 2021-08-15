@@ -34,7 +34,7 @@ class ChunkedUploadBaseView(GenericAPIView):
         """
         if _settings.USER_RESTRICTED and hasattr(self.model, self.user_field_name):
             if hasattr(self.request, 'user') and self.request.user.is_authenticated:
-                queryset = self.model.objects.filter(user=self.request.user)
+                queryset = self.model.objects.filter(**{self.user_field_name: self.request.user})
             else:
                 queryset = self.model.objects.none()
         else:
