@@ -12,7 +12,8 @@ version = os.environ.get('DCU_VERSION', '0.0.0')
 
 setup(
     name='drf-chunked-upload',
-    packages=find_packages(exclude=['tests*']),
+    packages=find_packages('src'),
+    package_dir={'': 'src'},
     version=version,
     description=('Upload large files to Django REST Framework in multiple chunks,' +
                  ' with the ability to resume if the upload is interrupted.'),
