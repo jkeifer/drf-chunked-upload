@@ -3,7 +3,6 @@ from django.conf import settings
 
 
 def pytest_configure():
-
     settings.configure(
         DEBUG=True,
         DEBUG_PROPAGATE_EXCEPTIONS=True,
