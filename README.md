@@ -191,8 +191,8 @@ Pull requests are also accepted.
 
 [build-status-image]: https://github.com/jkeifer/drf-chunked-upload/actions/workflows/main.yml/badge.svg
 [build-status]: https://github.com/jkeifer/drf-chunked-upload/actions/workflows/main.yml
-[coverage-status-image]: https://img.shields.io/codecov/c/github/jkeifer/drf-chunked-upload/master.svg
-[codecov]: https://codecov.io/github/jkeifer/drf-chunked-upload?branch=master
+[coverage-status-image]: https://img.shields.io/codecov/c/github/jkeifer/drf-chunked-upload/main.svg
+[codecov]: https://codecov.io/github/jkeifer/drf-chunked-upload?branch=main
 [pypi-version]: https://img.shields.io/pypi/v/drf-chunked-upload.svg
 [pypi]: https://pypi.org/project/drf-chunked-upload/
 [github-jm]: https://github.com/juliomalegria
