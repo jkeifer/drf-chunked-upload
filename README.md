@@ -1,6 +1,5 @@
 # drf-chunked-upload
 
-[![build-status-image]][build-status]
 [![coverage-status-image]][codecov]
 [![pypi-version]][pypi]
 
@@ -189,8 +188,6 @@ If you find any bug or you want to propose a new feature, please use the
 Pull requests are also accepted.
 
 
-[build-status-image]: https://github.com/jkeifer/drf-chunked-upload/actions/workflows/main.yml/badge.svg
-[build-status]: https://github.com/jkeifer/drf-chunked-upload/actions/workflows/main.yml
 [coverage-status-image]: https://img.shields.io/codecov/c/github/jkeifer/drf-chunked-upload/main.svg
 [codecov]: https://codecov.io/github/jkeifer/drf-chunked-upload?branch=main
 [pypi-version]: https://img.shields.io/pypi/v/drf-chunked-upload.svg
