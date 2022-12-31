@@ -98,10 +98,15 @@ r = requests.post(upload_url, data={"md5": "fc3ff98e8c6a0d3087d515c0473f8677"})
 
 6.  If everything is OK, server will response with status code 200 and
     the data returned in the method `get_response_data` (if any).
-7.  If you want to upload a file as a single chunk, this is also
-    possible! Simply make the first request a POST and include the
-    checksum digest for the file. You don\'t need to include the
-    `Content-Range` header if uploading a whole file.
+
+If you want to upload a file as a single chunk, this is also possible! Simply make the
+first request a POST and include the checksum digest for the file. You don't need to
+include the `Content-Range` header if uploading a whole file.
+
+If you want to see the list of pending chunked uploads, make a `GET` request to the URL
+linked to `ChunkedUploadView` (or any subclass). You will get a list of pending chunked
+uploads (for the currently authenticated user only).
+
 
 **Possible error responses:**
 
