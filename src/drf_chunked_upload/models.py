@@ -123,7 +123,10 @@ class AbstractChunkedUpload(models.Model):
                             size=self.file.size)
 
     @transaction.atomic
-    def completed(self, completed_at=timezone.now(), ext=_settings.COMPLETE_EXT):
+    def completed(self, completed_at=None, ext=_settings.COMPLETE_EXT):
+        if completed_at is None:
+            completed_at = timezone.now()
+
         if ext != _settings.INCOMPLETE_EXT:
             original_path = self.file.path
             self.file.name = os.path.splitext(self.file.name)[0] + ext
