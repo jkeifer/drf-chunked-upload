@@ -50,7 +50,7 @@ INSTALLED_APPS = (
 2. In return, the server will respond with the `url` of the upload, and the
    current `offset`. Example:
 
-   ```json
+   ```python
    {
        'id': 'f64ebd67-83a3-45b6-8acd-c749ea1ed4cd'
        'url': 'https://your-host/<path_to_view>/f64ebd67-83a3-45b6-8acd-c749ea1ed4cd',
