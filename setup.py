@@ -26,6 +26,6 @@ setup(
         'Django>=2.2,<5.0',
         'djangorestframework>=3.11,<4.0',
     ],
-    python_requires='>3.6',
+    python_requires='>3.7',
     license='MIT-Zero',
 )
