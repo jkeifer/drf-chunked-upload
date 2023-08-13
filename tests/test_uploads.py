@@ -189,7 +189,8 @@ def test_chunked_upload_wrong_order(view, user1):
     print(response.data)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.data['detail'] == 'Offsets do not match'
-    assert response.data['offset'] == 10
+    assert response.data['expected_offset'] == 10
+    assert response.data['provided_offset'] == 20
 
 
 @pytest.mark.django_db
