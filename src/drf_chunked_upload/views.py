@@ -6,6 +6,8 @@ from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework import status
 
 from django.shortcuts import get_object_or_404
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 
 from drf_chunked_upload import settings as _settings
 from drf_chunked_upload.models import ChunkedUpload
@@ -265,6 +267,7 @@ class ChunkedUploadView(ListModelMixin, RetrieveModelMixin,
 
         return self.on_completion(chunked_upload, request)
 
+    @method_decorator(cache_page(0))
     def _get(self, request, pk=None, *args, **kwargs):
         if pk:
             return self.retrieve(request, pk=pk, *args, **kwargs)
