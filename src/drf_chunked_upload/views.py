@@ -187,9 +187,12 @@ class ChunkedUploadView(ListModelMixin, RetrieveModelMixin,
                                                pk=upload_id)
             self.is_valid_chunked_upload(chunked_upload)
             if chunked_upload.offset != start:
-                raise ChunkedUploadError(status=status.HTTP_400_BAD_REQUEST,
-                                         detail='Offsets do not match',
-                                         offset=chunked_upload.offset)
+                raise ChunkedUploadError(
+                     status=status.HTTP_400_BAD_REQUEST,
+                     detail='Offsets do not match',
+                     expected_offset=chunked_upload.offset,
+                     provided_offset=start,
+                )
 
             chunked_upload.append_chunk(chunk, chunk_size=chunk_size)
         else:
